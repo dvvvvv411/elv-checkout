@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
+import { CheckoutProgress } from "@/components/checkout/CheckoutProgress";
 import { CustomerForm } from "@/components/checkout/CustomerForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { Toaster } from "@/components/ui/sonner";
@@ -41,6 +42,7 @@ function CheckoutPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-8">
           {/* Linke Spalte 60% */}
           <div className="lg:col-span-3">
+            <CheckoutProgress />
             <CustomerForm />
           </div>
 

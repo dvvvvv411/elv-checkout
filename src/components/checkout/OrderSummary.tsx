@@ -76,7 +76,7 @@ export function OrderSummary() {
                 <p className="truncate text-sm font-medium text-foreground">{item.name}</p>
                 <p className="truncate text-xs text-muted-foreground">{item.variant}</p>
               </div>
-              <div className="text-sm font-semibold text-foreground">
+              <div className="font-numeric text-sm font-semibold text-foreground">
                 {formatEUR(item.priceGross * item.quantity)}
               </div>
             </li>
@@ -119,7 +119,7 @@ export function OrderSummary() {
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between text-muted-foreground">
             <dt>Bruttopreis</dt>
-            <dd className="font-medium text-foreground">{formatEUR(prices.subtotalGross)}</dd>
+            <dd className="font-numeric font-medium text-foreground">{formatEUR(prices.subtotalGross)}</dd>
           </div>
           <div className="flex justify-between text-muted-foreground">
             <dt>Versand</dt>
@@ -127,23 +127,23 @@ export function OrderSummary() {
               {prices.shippingGross === 0 ? (
                 <span className="text-trust">Kostenlos</span>
               ) : (
-                <span className="text-foreground">{formatEUR(prices.shippingGross)}</span>
+                <span className="font-numeric text-foreground">{formatEUR(prices.shippingGross)}</span>
               )}
             </dd>
           </div>
           {prices.discountGross > 0 && (
             <div className="flex justify-between">
               <dt className="text-trust">Rabatt</dt>
-              <dd className="font-medium text-trust">−{formatEUR(prices.discountGross)}</dd>
+              <dd className="font-numeric font-medium text-trust">−{formatEUR(prices.discountGross)}</dd>
             </div>
           )}
           <div className="flex justify-between text-xs text-muted-foreground">
             <dt>Nettobetrag</dt>
-            <dd>{formatEUR(prices.totalNet)}</dd>
+            <dd className="font-numeric">{formatEUR(prices.totalNet)}</dd>
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
             <dt>MwSt ({Math.round(prices.vatRate * 100)}%)</dt>
-            <dd>{formatEUR(prices.totalVat)}</dd>
+            <dd className="font-numeric">{formatEUR(prices.totalVat)}</dd>
           </div>
         </dl>
 
@@ -151,7 +151,7 @@ export function OrderSummary() {
 
         <div className="flex items-end justify-between">
           <span className="text-sm font-medium text-muted-foreground">Gesamt</span>
-          <span className="text-3xl font-bold text-gradient-primary">
+          <span className="font-numeric text-3xl font-bold text-gradient-primary">
             {formatEUR(prices.totalGross)}
           </span>
         </div>
