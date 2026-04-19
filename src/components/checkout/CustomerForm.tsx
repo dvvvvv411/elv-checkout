@@ -151,7 +151,7 @@ export function CustomerForm() {
       cardLinked: false,
       acceptTerms: false as unknown as true,
     },
-    mode: "onBlur",
+    mode: "onTouched",
     reValidateMode: "onChange",
   });
 
@@ -160,6 +160,7 @@ export function CustomerForm() {
     handleSubmit,
     watch,
     setValue,
+    trigger,
     formState: { errors },
   } = form;
 
