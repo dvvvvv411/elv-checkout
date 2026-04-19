@@ -1,29 +1,25 @@
 
 
-## Plan: Staggered Fade-in von oben nach unten
+## Plan: Font für Zahlen ändern
 
-Beim Laden der Seite sollen die Hauptbereiche nacheinander sanft von oben nach unten eingeblendet werden (Staggered Fade-in).
+Aktuell nutzen die Zahlen `Space Grotesk`. Der User möchte etwas wie **Roboto** — schlage **Roboto Mono** vor, weil:
+- echte Monospace → Preise sind in Tabellen perfekt ausgerichtet
+- modern, neutral, sehr clean
+- vom Google-Roboto-Universum, sehr bekannt/seriös
 
-### Reihenfolge der Animation
-1. `CheckoutHeader` (0ms)
-2. `<h1>Bestellung abschließen</h1>` Block (80ms)
-3. `CheckoutProgress` (160ms)
-4. `CustomerForm` Sections — jede SectionCard mit eigenem Stagger (240ms, 320ms, 400ms, 480ms)
-5. `OrderSummary` (240ms, parallel zur ersten Section)
-6. Footer (600ms)
+Alternative wäre **JetBrains Mono** (technischer) oder **Roboto** (proportional, weniger Tabellen-Feeling).
 
-### Umsetzung
+### Änderungen
 
-**1. Neue Keyframe-Animation in `src/styles.css`**
-- Bestehende `fade-in` Animation nutzt `translateY(8px)` → leicht erhöhen auf `translateY(-12px)` damit es klarer "von oben" kommt. Da `fade-in` schon woanders genutzt wird: stattdessen neue Utility `animate-fade-in-down` mit `translateY(-16px)` → `0` und Dauer 0.6s `ease-out`.
+**1. `src/routes/__root.tsx`**
+- Google-Fonts-Link von `Space+Grotesk` auf `Roboto+Mono:wght@400;500;600;700` umstellen.
 
-**2. Stagger via inline `style={{ animationDelay: "..." }}`**
-- An die zu animierenden Container die Klasse `animate-fade-in-down` und einen `style={{ animationDelay: "Xms", animationFillMode: "both" }}` hängen.
+**2. `src/styles.css`**
+- `.font-numeric` Utility: `font-family` von `"Space Grotesk"` auf `"Roboto Mono"` ändern. `tabular-nums`/`tnum` bleiben (bei Monospace ohnehin redundant, schadet nicht). Letter-spacing leicht reduzieren (`-0.005em`).
+
+Keine Änderungen an Komponenten nötig — die `.font-numeric` Klasse ist überall gesetzt.
 
 ### Geänderte Dateien
-- `src/styles.css` — neue Keyframe `fade-in-down` + Utility `.animate-fade-in-down`
-- `src/routes/index.tsx` — Animation + Delays auf Header-Bereich, h1-Block, Progress, Footer-Wrapper
-- `src/components/checkout/CustomerForm.tsx` — Wrapper jeder SectionCard mit gestaffelten Delays
-- `src/components/checkout/OrderSummary.tsx` — Container mit Delay
-- `src/components/checkout/CheckoutHeader.tsx` — leichter Fade-in oben
+- `src/routes/__root.tsx`
+- `src/styles.css`
 
