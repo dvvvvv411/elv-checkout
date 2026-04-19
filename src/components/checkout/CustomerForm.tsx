@@ -112,7 +112,7 @@ function Field({ id, label, error, required, children, className }: FieldProps) 
       data-invalid={error ? "true" : undefined}
       className={cn(
         "space-y-1.5 rounded-lg transition-colors",
-        "[&[data-invalid=true]_input]:border-destructive [&[data-invalid=true]_input]:border-2 [&[data-invalid=true]_input]:ring-2 [&[data-invalid=true]_input]:ring-destructive/30",
+        "[&[data-invalid=true]_input]:border-destructive/70 [&[data-invalid=true]_input]:ring-1 [&[data-invalid=true]_input]:ring-destructive/15",
         className,
       )}
     >
