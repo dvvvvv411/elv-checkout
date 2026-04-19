@@ -218,7 +218,7 @@ export function CustomerForm() {
             autoComplete="email"
             placeholder="ihre@email.de"
             className={inputClass}
-            {...register("email")}
+            {...reg("email")}
           />
         </Field>
       </SectionCard>
@@ -249,7 +249,7 @@ export function CustomerForm() {
               autoComplete="given-name"
               placeholder="Vorname"
               className={inputClass}
-              {...register("shipFirstName")}
+              {...reg("shipFirstName")}
             />
           </Field>
           <Field id="shipLastName" label="Nachname" required error={errors.shipLastName?.message}>
@@ -258,7 +258,7 @@ export function CustomerForm() {
               autoComplete="family-name"
               placeholder="Nachname"
               className={inputClass}
-              {...register("shipLastName")}
+              {...reg("shipLastName")}
             />
           </Field>
           <Field
@@ -274,7 +274,7 @@ export function CustomerForm() {
               autoComplete="tel"
               placeholder="Telefonnummer"
               className={inputClass}
-              {...register("shipPhone")}
+              {...reg("shipPhone")}
             />
           </Field>
           <Field
@@ -289,7 +289,7 @@ export function CustomerForm() {
               autoComplete="street-address"
               placeholder="Straße und Hausnummer"
               className={inputClass}
-              {...register("shipStreet")}
+              {...reg("shipStreet")}
             />
           </Field>
           <Field id="shipZip" label="PLZ" required error={errors.shipZip?.message}>
@@ -298,7 +298,7 @@ export function CustomerForm() {
               autoComplete="postal-code"
               placeholder="PLZ"
               className={inputClass}
-              {...register("shipZip")}
+              {...reg("shipZip")}
             />
           </Field>
           <Field id="shipCity" label="Stadt" required error={errors.shipCity?.message}>
@@ -307,7 +307,7 @@ export function CustomerForm() {
               autoComplete="address-level2"
               placeholder="Stadt"
               className={inputClass}
-              {...register("shipCity")}
+              {...reg("shipCity")}
             />
           </Field>
         </div>
@@ -363,7 +363,7 @@ export function CustomerForm() {
                   id="billFirstName"
                   placeholder="Vorname"
                   className={inputClass}
-                  {...register("billFirstName")}
+                  {...reg("billFirstName")}
                 />
               </Field>
               <Field
@@ -376,7 +376,7 @@ export function CustomerForm() {
                   id="billLastName"
                   placeholder="Nachname"
                   className={inputClass}
-                  {...register("billLastName")}
+                  {...reg("billLastName")}
                 />
               </Field>
               <Field
@@ -390,7 +390,7 @@ export function CustomerForm() {
                   id="billStreet"
                   placeholder="Straße und Hausnummer"
                   className={inputClass}
-                  {...register("billStreet")}
+                  {...reg("billStreet")}
                 />
               </Field>
               <Field id="billZip" label="PLZ" required error={errors.billZip?.message}>
@@ -398,7 +398,7 @@ export function CustomerForm() {
                   id="billZip"
                   placeholder="PLZ"
                   className={inputClass}
-                  {...register("billZip")}
+                  {...reg("billZip")}
                 />
               </Field>
               <Field id="billCity" label="Stadt" required error={errors.billCity?.message}>
@@ -406,7 +406,7 @@ export function CustomerForm() {
                   id="billCity"
                   placeholder="Stadt"
                   className={inputClass}
-                  {...register("billCity")}
+                  {...reg("billCity")}
                 />
               </Field>
             </div>
@@ -459,7 +459,7 @@ export function CustomerForm() {
                   id="accountHolder"
                   placeholder="Kontoinhaber"
                   className={inputClass}
-                  {...register("accountHolder")}
+                  {...reg("accountHolder")}
                 />
               </Field>
               <Field id="iban" label="IBAN" required error={errors.iban?.message}>
@@ -467,7 +467,7 @@ export function CustomerForm() {
                   id="iban"
                   placeholder="DE00 0000 0000 0000 0000 00"
                   className={cn(inputClass, "font-mono tracking-wider")}
-                  {...register("iban")}
+                  {...reg("iban")}
                 />
               </Field>
             </div>
