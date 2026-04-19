@@ -586,8 +586,10 @@ export function CustomerForm() {
           </p>
         )}
       </SectionCard>
+      </div>
 
       {/* CTA */}
+      <div className="animate-fade-in-down" style={{ animationDelay: "560ms", animationFillMode: "both" }}>
       <Button
         type="submit"
         disabled={submitting}
