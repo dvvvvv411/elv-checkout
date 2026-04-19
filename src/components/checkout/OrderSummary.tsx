@@ -155,9 +155,6 @@ export function OrderSummary() {
             {formatEUR(prices.totalGross)}
           </span>
         </div>
-        <p className="mt-1 text-right text-[11px] text-muted-foreground">
-          inkl. MwSt, in EUR
-        </p>
       </div>
 
       <TrustPanel />
