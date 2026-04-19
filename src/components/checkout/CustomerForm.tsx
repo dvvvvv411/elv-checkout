@@ -544,8 +544,10 @@ export function CustomerForm() {
           </p>
         )}
       </SectionCard>
+      </div>
 
       {/* Bedingungen */}
+      <div className="animate-fade-in-down" style={{ animationDelay: "480ms", animationFillMode: "both" }}>
       <SectionCard
         title="Bedingungen"
         icon={<FileText className="h-4 w-4" />}
