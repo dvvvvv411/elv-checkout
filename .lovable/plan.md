@@ -1,28 +1,38 @@
 
 
-## Plan: Payment-Icons über Vite-Asset-Imports einbinden
+## Plan: Header aufräumen — Logo & Trust Badges
 
-### Problem
-Die SVGs liegen in `public/payment-icons/`, werden im Preview aber nicht ausgeliefert (Netzwerk-Tab zeigt keine Requests darauf). In dieser TanStack-Start + Cloudflare-Worker-Konfiguration ist der zuverlässigste Weg, statische SVGs als Vite-Asset-Module zu importieren — dann werden sie gehasht in den Build mitgenommen und sicher ausgeliefert.
+In `src/components/checkout/CheckoutHeader.tsx`:
 
-### Schritte
+### 1. Logo
+- Den `<div>` mit dem grünen "N"-Quadrat (Gradient-Kreis) **entfernen**.
+- Nur den Text `Nova Shop` mit dem Gradient auf "Shop" beibehalten, etwas größer (`text-xl`) und gewichtiger (`font-bold tracking-tight`).
 
-1. SVGs nach `src/assets/payment-icons/` verschieben:
-   - `src/assets/payment-icons/visa.svg`
-   - `src/assets/payment-icons/mastercard.svg`
-   - `src/assets/payment-icons/amex.svg`
-   - alte Dateien unter `public/payment-icons/` löschen.
+### 2. Trust Badges — seriöser
+Aktuell: zwei pillenförmige, leicht bunte Badges (grün/teal Tönung). Wirken wie Marketing-Sticker.
 
-2. In `src/components/checkout/CustomerForm.tsx` die drei SVGs am Datei-Anfang als URL-Module importieren und als `src` an die `<img>` Tags übergeben:
-   ```tsx
-   import visaIcon from "@/assets/payment-icons/visa.svg";
-   import mastercardIcon from "@/assets/payment-icons/mastercard.svg";
-   import amexIcon from "@/assets/payment-icons/amex.svg";
-   ```
-   Dann `<img src={visaIcon} ... />` etc.
+Neuer Stil — dezent & seriös:
+- Kein farbiger Hintergrund mehr, kein farbiger Border.
+- Stattdessen schlichte Inline-Items: kleines Icon + Text in `text-muted-foreground`, `text-xs font-medium`.
+- Trennung durch dünnen vertikalen Divider (`<span className="h-4 w-px bg-border" />`) zwischen den Items statt zwei separate Pills.
+- Icons in `text-foreground/70`, leicht kleiner (`h-3.5 w-3.5`).
+- Auf Mobile: nur Icons sichtbar, Text ab `sm:` einblenden (wie bisher).
 
-### Geänderte/verschobene Dateien
-- neu: `src/assets/payment-icons/visa.svg`, `mastercard.svg`, `amex.svg`
-- gelöscht: `public/payment-icons/*`
-- geändert: `src/components/checkout/CustomerForm.tsx`
+Beispielstruktur:
+```tsx
+<div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
+  <span className="flex items-center gap-1.5">
+    <Lock className="h-3.5 w-3.5" />
+    <span className="hidden sm:inline">SSL-verschlüsselt</span>
+  </span>
+  <span className="hidden h-4 w-px bg-border sm:block" />
+  <span className="flex items-center gap-1.5">
+    <ShieldCheck className="h-3.5 w-3.5" />
+    <span className="hidden sm:inline">Käuferschutz</span>
+  </span>
+</div>
+```
+
+### Geänderte Datei
+- `src/components/checkout/CheckoutHeader.tsx`
 
