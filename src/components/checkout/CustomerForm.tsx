@@ -217,20 +217,23 @@ export function CustomerForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Kontakt */}
-      <SectionCard title="Kontakt" icon={<Mail className="h-4 w-4" />} hasError={contactHasError}>
-        <Field id="email" label="E-Mail-Adresse" required error={errors.email?.message}>
-          <Input
-            id="email"
-            type="email"
-            autoComplete="email"
-            placeholder="ihre@email.de"
-            className={inputClass}
-            {...reg("email")}
-          />
-        </Field>
-      </SectionCard>
+      <div className="animate-fade-in-down" style={{ animationDelay: "240ms", animationFillMode: "both" }}>
+        <SectionCard title="Kontakt" icon={<Mail className="h-4 w-4" />} hasError={contactHasError}>
+          <Field id="email" label="E-Mail-Adresse" required error={errors.email?.message}>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="ihre@email.de"
+              className={inputClass}
+              {...reg("email")}
+            />
+          </Field>
+        </SectionCard>
+      </div>
 
       {/* Lieferadresse */}
+      <div className="animate-fade-in-down" style={{ animationDelay: "320ms", animationFillMode: "both" }}>
       <SectionCard
         title="Lieferadresse"
         icon={<Truck className="h-4 w-4" />}
@@ -420,8 +423,10 @@ export function CustomerForm() {
           </div>
         )}
       </SectionCard>
+      </div>
 
       {/* Zahlungsart */}
+      <div className="animate-fade-in-down" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
       <SectionCard
         title="Zahlungsart"
         icon={<CreditCard className="h-4 w-4" />}
@@ -539,8 +544,10 @@ export function CustomerForm() {
           </p>
         )}
       </SectionCard>
+      </div>
 
       {/* Bedingungen */}
+      <div className="animate-fade-in-down" style={{ animationDelay: "480ms", animationFillMode: "both" }}>
       <SectionCard
         title="Bedingungen"
         icon={<FileText className="h-4 w-4" />}
@@ -579,8 +586,10 @@ export function CustomerForm() {
           </p>
         )}
       </SectionCard>
+      </div>
 
       {/* CTA */}
+      <div className="animate-fade-in-down" style={{ animationDelay: "560ms", animationFillMode: "both" }}>
       <Button
         type="submit"
         disabled={submitting}
@@ -602,6 +611,7 @@ export function CustomerForm() {
       <p className="text-center text-xs text-muted-foreground">
         Mit Klick auf „Zahlungspflichtig bestellen" schließt du den Kauf verbindlich ab.
       </p>
+      </div>
     </form>
   );
 }
