@@ -40,7 +40,7 @@ function CheckoutPage() {
             Bestellung abschließen
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Nur noch ein paar Schritte bis zu deinem neuen Lieblingsprodukt.
+            Nur noch ein paar Schritte bis zum Abschluss.
           </p>
         </div>
 
