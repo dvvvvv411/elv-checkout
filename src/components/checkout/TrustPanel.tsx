@@ -1,4 +1,38 @@
-import { Star } from "lucide-react";
+type SharpStarProps = {
+  className?: string;
+  filled?: boolean;
+};
+
+// Spitzer 5-Zack-Stern mit tiefen Einkerbungen (innerer Radius ~0.38)
+function SharpStar({ className, filled = true }: SharpStarProps) {
+  // Punkte berechnet auf viewBox 24x24, center (12,12), outer r=11, inner r=4.2
+  // 10 Punkte: alternating outer/inner, start at top (-90deg)
+  const points = [
+    "12,1",
+    "13.45,8.36",
+    "20.78,7.54",
+    "15.16,12.34",
+    "18.89,18.71",
+    "12,15.6",
+    "5.11,18.71",
+    "8.84,12.34",
+    "3.22,7.54",
+    "10.55,8.36",
+  ].join(" ");
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth={filled ? 0 : 1.5}
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polygon points={points} />
+    </svg>
+  );
+}
 
 export function TrustPanel() {
   return (
@@ -6,30 +40,37 @@ export function TrustPanel() {
       {/* Bewertung */}
       <div className="flex items-start gap-3">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-primary shadow-elegant">
-          <Star className="h-6 w-6 fill-white text-white" />
+          <SharpStar className="h-6 w-6 text-white" />
         </div>
         <div>
           <div className="flex items-center gap-1">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Star
+              <span
                 key={i}
-                className="h-4 w-4 animate-count-up fill-yellow-400 text-yellow-400"
-                style={{ animationDelay: `${i * 70}ms` }}
-              />
+                className="inline-flex animate-star-pop text-yellow-400"
+                style={{ animationDelay: `${i * 120}ms` }}
+              >
+                <SharpStar className="h-4 w-4" />
+              </span>
             ))}
-            <span className="ml-1.5 text-sm font-bold text-foreground">4,9 / 5</span>
+            <span
+              className="ml-1.5 animate-fade-in text-sm font-bold text-foreground"
+              style={{ animationDelay: "700ms" }}
+            >
+              4,9 / 5
+            </span>
           </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p
+            className="mt-0.5 animate-fade-in text-xs text-muted-foreground"
+            style={{ animationDelay: "850ms" }}
+          >
             Über <span className="font-semibold text-foreground">12.487</span> zufriedene Kunden
           </p>
         </div>
       </div>
 
       {/* Unternehmensname */}
-      <p className="mt-4 text-center text-[11px] text-muted-foreground">
-        NovaShop GmbH <span className="mx-1 opacity-50">·</span> Seit 2018{" "}
-        <span className="mx-1 opacity-50">·</span> Made in Germany
-      </p>
+      <p className="mt-4 text-center text-[11px] text-muted-foreground">NovaShop GmbH</p>
     </div>
   );
 }
