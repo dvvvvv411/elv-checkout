@@ -1,25 +1,20 @@
 
 
-## Plan: Font für Zahlen ändern
+## Plan: Numerische Font auf System UI Sans Serif
 
-Aktuell nutzen die Zahlen `Space Grotesk`. Der User möchte etwas wie **Roboto** — schlage **Roboto Mono** vor, weil:
-- echte Monospace → Preise sind in Tabellen perfekt ausgerichtet
-- modern, neutral, sehr clean
-- vom Google-Roboto-Universum, sehr bekannt/seriös
-
-Alternative wäre **JetBrains Mono** (technischer) oder **Roboto** (proportional, weniger Tabellen-Feeling).
+User möchte `ui-sans-serif` statt Roboto Mono für die Zahlen — also die native System-Sans-Serif des Geräts (San Francisco auf macOS/iOS, Segoe UI auf Windows, Roboto auf Android). Modern, schnell (kein Webfont-Load), neutral.
 
 ### Änderungen
 
-**1. `src/routes/__root.tsx`**
-- Google-Fonts-Link von `Space+Grotesk` auf `Roboto+Mono:wght@400;500;600;700` umstellen.
+**1. `src/styles.css` — `.font-numeric` Utility**
+- `font-family` auf `ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` umstellen.
+- `font-feature-settings: "tnum" 1` und `font-variant-numeric: tabular-nums` BEHALTEN — wichtig, damit Zahlen in Preistabellen trotz proportionaler Sans-Serif gleich breit ausgerichtet bleiben.
+- `letter-spacing: -0.01em` für etwas tightere, modernere Optik.
 
-**2. `src/styles.css`**
-- `.font-numeric` Utility: `font-family` von `"Space Grotesk"` auf `"Roboto Mono"` ändern. `tabular-nums`/`tnum` bleiben (bei Monospace ohnehin redundant, schadet nicht). Letter-spacing leicht reduzieren (`-0.005em`).
-
-Keine Änderungen an Komponenten nötig — die `.font-numeric` Klasse ist überall gesetzt.
+**2. `src/routes/__root.tsx`**
+- Google-Fonts-Link für Roboto Mono entfernen (wird nicht mehr gebraucht) → spart einen Network-Request.
 
 ### Geänderte Dateien
-- `src/routes/__root.tsx`
 - `src/styles.css`
+- `src/routes/__root.tsx`
 
