@@ -1,21 +1,27 @@
 
 
-## Plan: IBAN Auto-Formatierung beim Tippen
+## Plan: Kreditkarten-Badges durch echte SVG-Logos ersetzen
 
-In `CustomerForm.tsx` das IBAN-Feld so erweitern, dass die Eingabe live im Format `DE00 0000 0000 0000 0000 00` (Vierergruppen, getrennt durch Leerzeichen) angezeigt wird — exakt wie im Placeholder.
+### Schritte
+1. Drei SVGs in `public/payment-icons/` ablegen:
+   - `public/payment-icons/visa.svg`
+   - `public/payment-icons/mastercard.svg`
+   - `public/payment-icons/amex.svg`
+   (via `lov-copy` aus `user-uploads://`)
 
-### Umsetzung
+2. In `src/components/checkout/CustomerForm.tsx` im Kreditkarte-Label:
+   - Die beiden alten `<span>VISA</span>` / `<span>MC</span>` Badges entfernen.
+   - Ersetzen durch drei `<img>` Tags mit den SVGs, einheitlich auf Höhe `h-6` (Original-Aspect 200×120 → Breite ~`w-10`), `rounded-[3px]`, `flex gap-1.5`.
 
-1. **Controlled-Wert für IBAN**: Statt `{...reg("iban")}` einen `Controller` aus `react-hook-form` benutzen (oder `watch("iban")` + `setValue`), damit wir den Anzeigewert beim Tippen formatieren können.
-2. **Formatter-Funktion** lokal in der Datei:
-   - Buchstaben groß, alle Nicht-Alphanumerischen entfernen.
-   - Auf 34 Zeichen begrenzen (max IBAN-Länge).
-   - In 4er-Gruppen mit Leerzeichen joinen: `match(/.{1,4}/g)?.join(" ")`.
-3. **onChange**: Eingabe formatieren, formatierten String in das Feld setzen (`setValue("iban", formatted, { shouldValidate: true })`).
-4. **Caret-Verhalten**: Einfaches Append am Ende reicht hier (Cursor immer ans Ende setzen ist meist okay; bei Bedarf nur Default-Browserverhalten lassen — ist für ein Mockup ausreichend).
-5. **Validierung**: Im bestehenden `superRefine` werden Leerzeichen schon mit `.replace(/\s+/g, "")` entfernt → bleibt unverändert kompatibel.
-6. **inputMode**: `inputMode="text"` + `autoComplete="off"` + `spellCheck={false}` ergänzen für saubere UX.
+```tsx
+<div className="flex items-center gap-1.5">
+  <img src="/payment-icons/visa.svg" alt="Visa" className="h-6 w-10 rounded-[3px]" />
+  <img src="/payment-icons/mastercard.svg" alt="Mastercard" className="h-6 w-10 rounded-[3px]" />
+  <img src="/payment-icons/amex.svg" alt="American Express" className="h-6 w-10 rounded-[3px]" />
+</div>
+```
 
-### Geänderte Datei
-- `src/components/checkout/CustomerForm.tsx`
+### Geänderte/neue Dateien
+- neu: `public/payment-icons/visa.svg`, `mastercard.svg`, `amex.svg`
+- geändert: `src/components/checkout/CustomerForm.tsx`
 
