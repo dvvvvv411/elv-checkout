@@ -199,6 +199,14 @@ export function CustomerForm() {
 
   const inputClass = "h-11 rounded-lg";
 
+  // Force validation on blur even for pristine empty required fields
+  const blurTrigger = (name: keyof FormValues) => ({
+    onBlur: () => {
+      void trigger(name);
+    },
+  });
+  const reg = (name: keyof FormValues) => register(name, blurTrigger(name));
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Kontakt */}
