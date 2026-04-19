@@ -45,7 +45,7 @@ const schema = z
     billZip: z.string().trim().max(10).optional(),
     billCity: z.string().trim().max(80).optional(),
 
-    paymentMethod: z.enum(["lastschrift", "kreditkarte"]),
+    paymentMethod: z.enum(["lastschrift", "kreditkarte"]).optional(),
     iban: z.string().trim().optional(),
     accountHolder: z.string().trim().optional(),
     cardLinked: z.boolean().optional(),
@@ -68,6 +68,13 @@ const schema = z
           ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: msg });
         }
       }
+    }
+    if (!data.paymentMethod) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["paymentMethod"],
+        message: "Bitte Zahlungsart auswählen",
+      });
     }
     if (data.paymentMethod === "lastschrift") {
       if (!data.accountHolder || data.accountHolder.trim().length < 2) {
@@ -145,7 +152,7 @@ export function CustomerForm() {
       shipZip: "",
       shipCity: "",
       billingSame: true,
-      paymentMethod: "lastschrift",
+      paymentMethod: undefined,
       iban: "",
       accountHolder: "",
       cardLinked: false,
@@ -334,7 +341,7 @@ export function CustomerForm() {
         </label>
 
         {!billingSame && (
-          <div className="animate-slide-down mt-4 rounded-xl border border-dashed border-primary/30 bg-gradient-soft p-4">
+          <div className="animate-slide-down mt-4 rounded-xl border border-dashed border-border bg-secondary/40 p-4">
             <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
               <Building2 className="h-4 w-4 text-primary" />
               Abweichende Rechnungsadresse
@@ -421,8 +428,12 @@ export function CustomerForm() {
         hasError={paymentHasError}
       >
         <RadioGroup
-          value={paymentMethod}
-          onValueChange={(v) => setValue("paymentMethod", v as "lastschrift" | "kreditkarte")}
+          value={paymentMethod ?? ""}
+          onValueChange={(v) =>
+            setValue("paymentMethod", v as "lastschrift" | "kreditkarte", {
+              shouldValidate: true,
+            })
+          }
           className="space-y-2.5"
         >
           {/* Lastschrift */}
@@ -448,7 +459,7 @@ export function CustomerForm() {
           </label>
 
           {paymentMethod === "lastschrift" && (
-            <div className="animate-slide-down ml-7 grid grid-cols-1 gap-4 rounded-xl border border-dashed border-primary/30 bg-gradient-soft p-4 sm:grid-cols-2">
+            <div className="animate-slide-down ml-7 grid grid-cols-1 gap-4 rounded-xl border border-dashed border-border bg-secondary/40 p-4 sm:grid-cols-2">
               <Field
                 id="accountHolder"
                 label="Kontoinhaber"
@@ -499,7 +510,7 @@ export function CustomerForm() {
           </label>
 
           {paymentMethod === "kreditkarte" && (
-            <div className="animate-slide-down ml-7 rounded-xl border border-dashed border-primary/30 bg-gradient-soft p-4">
+            <div className="animate-slide-down ml-7 rounded-xl border border-dashed border-border bg-secondary/40 p-4">
               <Button
                 type="button"
                 onClick={() => {
@@ -521,6 +532,12 @@ export function CustomerForm() {
             </div>
           )}
         </RadioGroup>
+        {errors.paymentMethod && (
+          <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-destructive">
+            <AlertCircle className="h-3.5 w-3.5" />
+            {errors.paymentMethod.message}
+          </p>
+        )}
       </SectionCard>
 
       {/* Bedingungen */}
