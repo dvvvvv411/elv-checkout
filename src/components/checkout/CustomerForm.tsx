@@ -15,6 +15,9 @@ import {
 import { toast } from "sonner";
 
 import { SectionCard } from "./SectionCard";
+import visaIcon from "@/assets/payment-icons/visa.svg";
+import mastercardIcon from "@/assets/payment-icons/mastercard.svg";
+import amexIcon from "@/assets/payment-icons/amex.svg";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
