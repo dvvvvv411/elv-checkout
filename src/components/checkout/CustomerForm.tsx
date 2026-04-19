@@ -233,6 +233,7 @@ export function CustomerForm() {
       </div>
 
       {/* Lieferadresse */}
+      <div className="animate-fade-in-down" style={{ animationDelay: "320ms", animationFillMode: "both" }}>
       <SectionCard
         title="Lieferadresse"
         icon={<Truck className="h-4 w-4" />}
