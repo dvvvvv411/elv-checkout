@@ -5,7 +5,7 @@ const ACTIVE_STEP = "Informationen";
 
 export function CheckoutProgress() {
   return (
-    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mb-5 flex flex-col items-start gap-2">
       <button
         type="button"
         onClick={() => window.history.back()}
