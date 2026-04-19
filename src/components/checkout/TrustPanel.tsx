@@ -2,10 +2,10 @@ import { Star } from "lucide-react";
 
 export function TrustPanel() {
   return (
-    <div className="animate-fade-in overflow-hidden rounded-2xl border border-amber-200/60 bg-[linear-gradient(135deg,oklch(0.985_0.04_90),oklch(0.97_0.05_85))] p-5 shadow-card">
+    <div className="animate-fade-in overflow-hidden rounded-2xl border border-primary/20 bg-[linear-gradient(135deg,#ffffff,oklch(0.99_0.015_160))] p-5 shadow-card">
       {/* Bewertung */}
       <div className="flex items-start gap-3">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 shadow-elegant">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-primary shadow-elegant">
           <Star className="h-6 w-6 fill-white text-white" />
         </div>
         <div>
