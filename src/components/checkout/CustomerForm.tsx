@@ -532,6 +532,12 @@ export function CustomerForm() {
             </div>
           )}
         </RadioGroup>
+        {errors.paymentMethod && (
+          <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-destructive">
+            <AlertCircle className="h-3.5 w-3.5" />
+            {errors.paymentMethod.message}
+          </p>
+        )}
       </SectionCard>
 
       {/* Bedingungen */}
