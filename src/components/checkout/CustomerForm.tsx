@@ -423,8 +423,10 @@ export function CustomerForm() {
           </div>
         )}
       </SectionCard>
+      </div>
 
       {/* Zahlungsart */}
+      <div className="animate-fade-in-down" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
       <SectionCard
         title="Zahlungsart"
         icon={<CreditCard className="h-4 w-4" />}
