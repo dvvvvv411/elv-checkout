@@ -175,6 +175,10 @@ export function CustomerForm() {
   const paymentMethod = watch("paymentMethod");
   const cardLinked = watch("cardLinked");
   const acceptTerms = watch("acceptTerms") as unknown as boolean;
+  const ibanValue = watch("iban") ?? "";
+
+  const formatIban = (raw: string) =>
+    (raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 34).match(/.{1,4}/g) ?? []).join(" ");
 
   const contactHasError = !!errors.email;
   const shippingHasError = !!(
