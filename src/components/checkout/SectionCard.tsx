@@ -13,8 +13,8 @@ export function SectionCard({ title, icon, hasError, children, className }: Sect
   return (
     <section
       className={cn(
-        "animate-fade-in rounded-2xl border bg-card p-5 shadow-card transition-colors sm:p-6",
-        hasError ? "border-destructive/50 bg-destructive/5" : "border-border",
+        "animate-fade-in rounded-2xl border-2 bg-card p-5 shadow-card transition-colors sm:p-6",
+        hasError ? "border-destructive bg-destructive/5" : "border-border",
         className,
       )}
     >
