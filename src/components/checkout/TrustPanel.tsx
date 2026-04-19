@@ -45,11 +45,13 @@ export function TrustPanel() {
         <div>
           <div className="flex items-center gap-1">
             {Array.from({ length: 5 }).map((_, i) => (
-              <SharpStar
+              <span
                 key={i}
-                className="h-4 w-4 animate-star-pop text-yellow-400"
-                {...({ style: { animationDelay: `${i * 120}ms` } } as object)}
-              />
+                className="inline-flex animate-star-pop text-yellow-400"
+                style={{ animationDelay: `${i * 120}ms` }}
+              >
+                <SharpStar className="h-4 w-4" />
+              </span>
             ))}
             <span
               className="ml-1.5 animate-fade-in text-sm font-bold text-foreground"
