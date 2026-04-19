@@ -1,22 +1,23 @@
 
 
-## Plan: Validation-Styling dezenter
+## Plan
 
-Aktuell sind die Fehler-Indikatoren zu dominant (border-2 + ring-2 + bg-destructive/5 auf der ganzen Card). Ziel: weiterhin klar erkennbar, aber subtiler und visuell ruhiger.
+### 1. Zurück-Button + Progress-Steps verschieben
+- Aus `CheckoutHeader.tsx` entfernen: den `← Zurück` Button und die `Warenkorb › Informationen › Versand › Zahlung` Navigation. Header behält nur Logo + Trust-Badges (SSL, Käuferschutz).
+- Neue Komponente `src/components/checkout/CheckoutProgress.tsx` mit Zurück-Button (links) und Progress-Steps (rechts daneben oder darunter).
+- In `src/routes/index.tsx` einbinden: direkt unter dem `<h1>Bestellung abschließen</h1>` Block und über dem 60/40-Grid — also über der linken Spalte mit `<CustomerForm />` (= über der Kontakt-Card). Volle Breite.
 
-### Änderungen
+### 2. Moderne Font für Zahlen
+- Tabular, moderne Schrift für alle Preiszahlen in `OrderSummary.tsx`: Bruttopreis, Versand, Rabatt, Nettobetrag, MwSt, Item-Preise und vor allem den großen Gesamtbetrag.
+- Lösung: Google Font **JetBrains Mono** oder **Space Grotesk** einbinden — für Zahlen finde ich **Space Grotesk** modern und seriös, mit `font-feature-settings: "tnum"` für tabular figures damit die Spalten sauber ausgerichtet sind.
+- Einbindung über `<link>` in `__root.tsx` head, dann in `src/styles.css` eine Utility `.font-numeric { font-family: 'Space Grotesk', ui-sans-serif; font-feature-settings: 'tnum' 1; font-variant-numeric: tabular-nums; }`.
+- Klasse `font-numeric` an alle `formatEUR(...)` Spans in `OrderSummary.tsx` hängen.
 
-**1. `Field`-Komponente in `CustomerForm.tsx`**
-- Input-Border: von `border-2` zurück auf normale `border` (1px) in Destructive-Farbe.
-- Ring: von `ring-2 ring-destructive/30` auf `ring-1 ring-destructive/20` reduzieren — oder ganz entfernen, nur die rote Border belassen.
-- Fehlertext und `AlertCircle` bleiben unverändert (sind bereits dezent).
-
-**2. `SectionCard.tsx`**
-- Border bei `hasError`: bleibt `border-destructive`, aber Border-Width wieder auf 1px (`border` statt `border-2`).
-- Hintergrund-Tönung: von `bg-destructive/5` auf `bg-destructive/[0.02]` oder ganz entfernen — nur die rote Border + rotes Icon-Badge als Signal.
-- Icon-Circle: bleibt `bg-destructive` (kleiner Akzent, nicht störend).
-
-**Geänderte Dateien**
-- `src/components/checkout/CustomerForm.tsx` (Field-Styling)
-- `src/components/checkout/SectionCard.tsx` (Card-Styling)
+### Geänderte Dateien
+- `src/components/checkout/CheckoutHeader.tsx` — Zurück + Steps entfernen
+- `src/components/checkout/CheckoutProgress.tsx` — neu
+- `src/routes/index.tsx` — `CheckoutProgress` einfügen, Font-Link in `__root.tsx` Head
+- `src/routes/__root.tsx` — Google Fonts Link
+- `src/styles.css` — `.font-numeric` Utility
+- `src/components/checkout/OrderSummary.tsx` — `font-numeric` Klasse an Zahlen
 
