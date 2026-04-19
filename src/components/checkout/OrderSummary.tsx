@@ -93,7 +93,7 @@ export function OrderSummary() {
             <Input
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="z.B. WILLKOMMEN10"
+              placeholder="Rabattcode"
               className="h-10 rounded-lg"
             />
             <Button
