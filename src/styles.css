@@ -165,10 +165,10 @@
     box-shadow: var(--shadow-glow);
   }
   .font-numeric {
-    font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     font-feature-settings: "tnum" 1;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.005em;
   }
 }
 
