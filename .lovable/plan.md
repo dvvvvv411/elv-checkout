@@ -1,27 +1,28 @@
 
 
-## Plan: Kreditkarten-Badges durch echte SVG-Logos ersetzen
+## Plan: Payment-Icons über Vite-Asset-Imports einbinden
+
+### Problem
+Die SVGs liegen in `public/payment-icons/`, werden im Preview aber nicht ausgeliefert (Netzwerk-Tab zeigt keine Requests darauf). In dieser TanStack-Start + Cloudflare-Worker-Konfiguration ist der zuverlässigste Weg, statische SVGs als Vite-Asset-Module zu importieren — dann werden sie gehasht in den Build mitgenommen und sicher ausgeliefert.
 
 ### Schritte
-1. Drei SVGs in `public/payment-icons/` ablegen:
-   - `public/payment-icons/visa.svg`
-   - `public/payment-icons/mastercard.svg`
-   - `public/payment-icons/amex.svg`
-   (via `lov-copy` aus `user-uploads://`)
 
-2. In `src/components/checkout/CustomerForm.tsx` im Kreditkarte-Label:
-   - Die beiden alten `<span>VISA</span>` / `<span>MC</span>` Badges entfernen.
-   - Ersetzen durch drei `<img>` Tags mit den SVGs, einheitlich auf Höhe `h-6` (Original-Aspect 200×120 → Breite ~`w-10`), `rounded-[3px]`, `flex gap-1.5`.
+1. SVGs nach `src/assets/payment-icons/` verschieben:
+   - `src/assets/payment-icons/visa.svg`
+   - `src/assets/payment-icons/mastercard.svg`
+   - `src/assets/payment-icons/amex.svg`
+   - alte Dateien unter `public/payment-icons/` löschen.
 
-```tsx
-<div className="flex items-center gap-1.5">
-  <img src="/payment-icons/visa.svg" alt="Visa" className="h-6 w-10 rounded-[3px]" />
-  <img src="/payment-icons/mastercard.svg" alt="Mastercard" className="h-6 w-10 rounded-[3px]" />
-  <img src="/payment-icons/amex.svg" alt="American Express" className="h-6 w-10 rounded-[3px]" />
-</div>
-```
+2. In `src/components/checkout/CustomerForm.tsx` die drei SVGs am Datei-Anfang als URL-Module importieren und als `src` an die `<img>` Tags übergeben:
+   ```tsx
+   import visaIcon from "@/assets/payment-icons/visa.svg";
+   import mastercardIcon from "@/assets/payment-icons/mastercard.svg";
+   import amexIcon from "@/assets/payment-icons/amex.svg";
+   ```
+   Dann `<img src={visaIcon} ... />` etc.
 
-### Geänderte/neue Dateien
-- neu: `public/payment-icons/visa.svg`, `mastercard.svg`, `amex.svg`
+### Geänderte/verschobene Dateien
+- neu: `src/assets/payment-icons/visa.svg`, `mastercard.svg`, `amex.svg`
+- gelöscht: `public/payment-icons/*`
 - geändert: `src/components/checkout/CustomerForm.tsx`
 
