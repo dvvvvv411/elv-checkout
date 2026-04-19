@@ -15,6 +15,9 @@ import {
 import { toast } from "sonner";
 
 import { SectionCard } from "./SectionCard";
+import visaIcon from "@/assets/payment-icons/visa.svg";
+import mastercardIcon from "@/assets/payment-icons/mastercard.svg";
+import amexIcon from "@/assets/payment-icons/amex.svg";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -516,9 +519,9 @@ export function CustomerForm() {
               <p className="text-xs text-muted-foreground">Visa, Mastercard, Amex</p>
             </div>
             <div className="flex items-center gap-1.5">
-              <img src="/payment-icons/visa.svg" alt="Visa" className="h-6 w-10 rounded-[3px]" />
-              <img src="/payment-icons/mastercard.svg" alt="Mastercard" className="h-6 w-10 rounded-[3px]" />
-              <img src="/payment-icons/amex.svg" alt="American Express" className="h-6 w-10 rounded-[3px]" />
+              <img src={visaIcon} alt="Visa" className="h-6 w-10 rounded-[3px]" />
+              <img src={mastercardIcon} alt="Mastercard" className="h-6 w-10 rounded-[3px]" />
+              <img src={amexIcon} alt="American Express" className="h-6 w-10 rounded-[3px]" />
             </div>
           </label>
 
