@@ -1,20 +1,26 @@
 
 
-## Plan: Numerische Font auf System UI Sans Serif
+## Plan: TrustPanel überarbeiten
 
-User möchte `ui-sans-serif` statt Roboto Mono für die Zahlen — also die native System-Sans-Serif des Geräts (San Francisco auf macOS/iOS, Segoe UI auf Windows, Roboto auf Android). Modern, schnell (kein Webfont-Load), neutral.
+### Änderungen in `src/components/checkout/TrustPanel.tsx`
 
-### Änderungen
+**1. Trust-Icons entfernen**
+- Die 4er-Grid mit `Lock / ShieldCheck / Truck / RotateCcw` komplett raus (sind im Header schon als Badges + werden weiter unten in den Bedingungen abgedeckt).
+- Auch der untere "Sichere Verbindung aktiv" Live-Indicator raus → ist redundant zum Header.
 
-**1. `src/styles.css` — `.font-numeric` Utility**
-- `font-family` auf `ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif` umstellen.
-- `font-feature-settings: "tnum" 1` und `font-variant-numeric: tabular-nums` BEHALTEN — wichtig, damit Zahlen in Preistabellen trotz proportionaler Sans-Serif gleich breit ausgerichtet bleiben.
-- `letter-spacing: -0.01em` für etwas tightere, modernere Optik.
+**2. Was bleibt + neu**
+- **Bewertungsblock** (Sterne + 4,9/5 + "Über 12.487 zufriedene Kunden") bleibt als Hauptinhalt.
+- **Neu:** dezenter Unternehmensname unter der Bewertung, z.B. kleine Zeile:  
+  `„NovaShop GmbH · Seit 2018 · Made in Germany"` in `text-[11px] text-muted-foreground` mit kleinem Trennpunkt.
 
-**2. `src/routes/__root.tsx`**
-- Google-Fonts-Link für Roboto Mono entfernen (wird nicht mehr gebraucht) → spart einen Network-Request.
+**3. Hintergrundfarbe gelblich statt grün**
+- Aktuell: `bg-gradient-soft` (nutzt grünliche Töne aus dem Primary-Farbsystem).
+- Neu: warmer, sehr dezenter gelblicher Verlauf direkt inline via Tailwind arbitrary values, z.B.  
+  `bg-[linear-gradient(135deg,oklch(0.985_0.04_90),oklch(0.97_0.05_85))]`  
+  → sehr helles Cream/Amber, passt zu den Sternen (yellow-400) und nimmt den grünen Eindruck raus.
+- Border ebenfalls leicht wärmer: `border-amber-200/60` statt `border-border`.
+- Star-Icon-Container (das große Quadrat links): von `bg-gradient-primary` (grün) auf `bg-gradient-to-br from-amber-400 to-yellow-500` umstellen, damit es zum neuen Look passt.
 
-### Geänderte Dateien
-- `src/styles.css`
-- `src/routes/__root.tsx`
+### Geänderte Datei
+- `src/components/checkout/TrustPanel.tsx`
 
