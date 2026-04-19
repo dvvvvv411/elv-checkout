@@ -188,8 +188,13 @@
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 .animate-fade-in { animation: fade-in 0.5s ease-out both; }
 .animate-slide-down { animation: slide-down 0.35s ease-out both; overflow: hidden; }
 .animate-trust-pulse { animation: trust-pulse 2.4s ease-in-out infinite; }
 .animate-count-up { animation: count-up 0.6s ease-out both; }
+.animate-fade-in-down { animation: fade-in-down 0.6s ease-out both; }
