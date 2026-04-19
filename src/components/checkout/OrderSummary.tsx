@@ -118,7 +118,7 @@ export function OrderSummary() {
         {/* Kostenaufschlüsselung */}
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between text-muted-foreground">
-            <dt>Zwischensumme</dt>
+            <dt>Bruttopreis</dt>
             <dd className="font-medium text-foreground">{formatEUR(prices.subtotalGross)}</dd>
           </div>
           <div className="flex justify-between text-muted-foreground">
@@ -138,11 +138,11 @@ export function OrderSummary() {
             </div>
           )}
           <div className="flex justify-between text-xs text-muted-foreground">
-            <dt>davon Netto</dt>
+            <dt>Nettobetrag</dt>
             <dd>{formatEUR(prices.totalNet)}</dd>
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
-            <dt>davon MwSt ({Math.round(prices.vatRate * 100)} %)</dt>
+            <dt>MwSt ({Math.round(prices.vatRate * 100)}%)</dt>
             <dd>{formatEUR(prices.totalVat)}</dd>
           </div>
         </dl>
