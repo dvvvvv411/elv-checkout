@@ -611,6 +611,7 @@ export function CustomerForm() {
       <p className="text-center text-xs text-muted-foreground">
         Mit Klick auf „Zahlungspflichtig bestellen" schließt du den Kauf verbindlich ab.
       </p>
+      </div>
     </form>
   );
 }
