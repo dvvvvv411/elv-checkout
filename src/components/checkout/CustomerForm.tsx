@@ -487,7 +487,14 @@ export function CustomerForm() {
                   id="iban"
                   placeholder="DE00 0000 0000 0000 0000 00"
                   className={cn(inputClass, "font-mono tracking-wider")}
-                  {...reg("iban")}
+                  inputMode="text"
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={ibanValue}
+                  onChange={(e) =>
+                    setValue("iban", formatIban(e.target.value), { shouldValidate: true })
+                  }
+                  onBlur={() => void trigger("iban")}
                 />
               </Field>
             </div>
