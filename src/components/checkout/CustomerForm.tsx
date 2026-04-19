@@ -2,7 +2,16 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Mail, Truck, CreditCard, FileText, Lock, Loader2, Building2 } from "lucide-react";
+import {
+  Mail,
+  Truck,
+  CreditCard,
+  FileText,
+  Lock,
+  Loader2,
+  Building2,
+  AlertCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { SectionCard } from "./SectionCard";
@@ -17,20 +26,18 @@ const ibanRegex = /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/;
 
 const schema = z
   .object({
-    email: z.string().trim().email("Bitte gültige E-Mail angeben").max(255),
+    email: z.string().trim().email("Bitte gültige E-Mail-Adresse angeben").max(255),
 
-    // Lieferadresse
     shipCompany: z.string().trim().max(100).optional(),
-    shipFirstName: z.string().trim().min(1, "Pflichtfeld").max(50),
-    shipLastName: z.string().trim().min(1, "Pflichtfeld").max(50),
-    shipPhone: z.string().trim().min(4, "Pflichtfeld").max(30),
-    shipStreet: z.string().trim().min(2, "Pflichtfeld").max(120),
-    shipZip: z.string().trim().min(4, "Pflichtfeld").max(10),
-    shipCity: z.string().trim().min(2, "Pflichtfeld").max(80),
+    shipFirstName: z.string().trim().min(1, "Vorname ist erforderlich").max(50),
+    shipLastName: z.string().trim().min(1, "Nachname ist erforderlich").max(50),
+    shipPhone: z.string().trim().min(4, "Telefonnummer ist erforderlich").max(30),
+    shipStreet: z.string().trim().min(2, "Straße und Hausnummer sind erforderlich").max(120),
+    shipZip: z.string().trim().min(4, "PLZ ist erforderlich").max(10),
+    shipCity: z.string().trim().min(2, "Stadt ist erforderlich").max(80),
 
     billingSame: z.boolean(),
 
-    // Rechnungsadresse (optional, validiert wenn billingSame=false)
     billCompany: z.string().trim().max(100).optional(),
     billFirstName: z.string().trim().max(50).optional(),
     billLastName: z.string().trim().max(50).optional(),
@@ -50,11 +57,11 @@ const schema = z
   .superRefine((data, ctx) => {
     if (!data.billingSame) {
       const required: Array<[keyof typeof data, string]> = [
-        ["billFirstName", "Pflichtfeld"],
-        ["billLastName", "Pflichtfeld"],
-        ["billStreet", "Pflichtfeld"],
-        ["billZip", "Pflichtfeld"],
-        ["billCity", "Pflichtfeld"],
+        ["billFirstName", "Vorname ist erforderlich"],
+        ["billLastName", "Nachname ist erforderlich"],
+        ["billStreet", "Straße und Hausnummer sind erforderlich"],
+        ["billZip", "PLZ ist erforderlich"],
+        ["billCity", "Stadt ist erforderlich"],
       ];
       for (const [field, msg] of required) {
         if (!data[field] || String(data[field]).trim().length < 1) {
@@ -67,7 +74,7 @@ const schema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["accountHolder"],
-          message: "Kontoinhaber angeben",
+          message: "Kontoinhaber ist erforderlich",
         });
       }
       const iban = (data.iban ?? "").replace(/\s+/g, "").toUpperCase();
@@ -75,7 +82,7 @@ const schema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["iban"],
-          message: "Ungültige IBAN",
+          message: "Bitte gültige IBAN angeben",
         });
       }
     }
@@ -101,12 +108,24 @@ interface FieldProps {
 
 function Field({ id, label, error, required, children, className }: FieldProps) {
   return (
-    <div className={cn("space-y-1.5", className)}>
+    <div
+      data-invalid={error ? "true" : undefined}
+      className={cn(
+        "space-y-1.5 rounded-lg transition-colors",
+        "[&[data-invalid=true]_input]:border-destructive [&[data-invalid=true]_input]:ring-2 [&[data-invalid=true]_input]:ring-destructive/20",
+        className,
+      )}
+    >
       <Label htmlFor={id} className="text-xs font-medium text-muted-foreground">
         {label} {required && <span className="text-primary">*</span>}
       </Label>
       {children}
-      {error && <p className="text-xs font-medium text-destructive">{error}</p>}
+      {error && (
+        <p className="flex items-center gap-1.5 text-xs font-medium text-destructive">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -133,6 +152,7 @@ export function CustomerForm() {
       acceptTerms: false as unknown as true,
     },
     mode: "onBlur",
+    reValidateMode: "onChange",
   });
 
   const {
@@ -148,6 +168,25 @@ export function CustomerForm() {
   const cardLinked = watch("cardLinked");
   const acceptTerms = watch("acceptTerms") as unknown as boolean;
 
+  const contactHasError = !!errors.email;
+  const shippingHasError = !!(
+    errors.shipCompany ||
+    errors.shipFirstName ||
+    errors.shipLastName ||
+    errors.shipPhone ||
+    errors.shipStreet ||
+    errors.shipZip ||
+    errors.shipCity ||
+    (!billingSame &&
+      (errors.billFirstName ||
+        errors.billLastName ||
+        errors.billStreet ||
+        errors.billZip ||
+        errors.billCity))
+  );
+  const paymentHasError = !!(errors.paymentMethod || errors.iban || errors.accountHolder || errors.cardLinked);
+  const termsHasError = !!errors.acceptTerms;
+
   const onSubmit = async (values: FormValues) => {
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 1100));
@@ -161,22 +200,26 @@ export function CustomerForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {/* 1. Kontakt */}
-      <SectionCard step={1} title="Kontakt" icon={<Mail className="h-4 w-4" />}>
+      {/* Kontakt */}
+      <SectionCard title="Kontakt" icon={<Mail className="h-4 w-4" />} hasError={contactHasError}>
         <Field id="email" label="E-Mail-Adresse" required error={errors.email?.message}>
           <Input
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="du@beispiel.de"
+            placeholder="ihre@email.de"
             className={inputClass}
             {...register("email")}
           />
         </Field>
       </SectionCard>
 
-      {/* 2. Lieferadresse */}
-      <SectionCard step={2} title="Lieferadresse" icon={<Truck className="h-4 w-4" />}>
+      {/* Lieferadresse */}
+      <SectionCard
+        title="Lieferadresse"
+        icon={<Truck className="h-4 w-4" />}
+        hasError={shippingHasError}
+      >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field
             id="shipCompany"
@@ -184,12 +227,18 @@ export function CustomerForm() {
             error={errors.shipCompany?.message}
             className="sm:col-span-2"
           >
-            <Input id="shipCompany" className={inputClass} {...register("shipCompany")} />
+            <Input
+              id="shipCompany"
+              placeholder="Firmenname"
+              className={inputClass}
+              {...register("shipCompany")}
+            />
           </Field>
           <Field id="shipFirstName" label="Vorname" required error={errors.shipFirstName?.message}>
             <Input
               id="shipFirstName"
               autoComplete="given-name"
+              placeholder="Vorname"
               className={inputClass}
               {...register("shipFirstName")}
             />
@@ -198,6 +247,7 @@ export function CustomerForm() {
             <Input
               id="shipLastName"
               autoComplete="family-name"
+              placeholder="Nachname"
               className={inputClass}
               {...register("shipLastName")}
             />
@@ -213,7 +263,7 @@ export function CustomerForm() {
               id="shipPhone"
               type="tel"
               autoComplete="tel"
-              placeholder="+49 ..."
+              placeholder="Telefonnummer"
               className={inputClass}
               {...register("shipPhone")}
             />
@@ -228,6 +278,7 @@ export function CustomerForm() {
             <Input
               id="shipStreet"
               autoComplete="street-address"
+              placeholder="Straße und Hausnummer"
               className={inputClass}
               {...register("shipStreet")}
             />
@@ -236,6 +287,7 @@ export function CustomerForm() {
             <Input
               id="shipZip"
               autoComplete="postal-code"
+              placeholder="PLZ"
               className={inputClass}
               {...register("shipZip")}
             />
@@ -244,6 +296,7 @@ export function CustomerForm() {
             <Input
               id="shipCity"
               autoComplete="address-level2"
+              placeholder="Stadt"
               className={inputClass}
               {...register("shipCity")}
             />
@@ -284,7 +337,12 @@ export function CustomerForm() {
                 error={errors.billCompany?.message}
                 className="sm:col-span-2"
               >
-                <Input id="billCompany" className={inputClass} {...register("billCompany")} />
+                <Input
+                  id="billCompany"
+                  placeholder="Firmenname"
+                  className={inputClass}
+                  {...register("billCompany")}
+                />
               </Field>
               <Field
                 id="billFirstName"
@@ -292,7 +350,12 @@ export function CustomerForm() {
                 required
                 error={errors.billFirstName?.message}
               >
-                <Input id="billFirstName" className={inputClass} {...register("billFirstName")} />
+                <Input
+                  id="billFirstName"
+                  placeholder="Vorname"
+                  className={inputClass}
+                  {...register("billFirstName")}
+                />
               </Field>
               <Field
                 id="billLastName"
@@ -300,7 +363,12 @@ export function CustomerForm() {
                 required
                 error={errors.billLastName?.message}
               >
-                <Input id="billLastName" className={inputClass} {...register("billLastName")} />
+                <Input
+                  id="billLastName"
+                  placeholder="Nachname"
+                  className={inputClass}
+                  {...register("billLastName")}
+                />
               </Field>
               <Field
                 id="billStreet"
@@ -309,21 +377,40 @@ export function CustomerForm() {
                 error={errors.billStreet?.message}
                 className="sm:col-span-2"
               >
-                <Input id="billStreet" className={inputClass} {...register("billStreet")} />
+                <Input
+                  id="billStreet"
+                  placeholder="Straße und Hausnummer"
+                  className={inputClass}
+                  {...register("billStreet")}
+                />
               </Field>
               <Field id="billZip" label="PLZ" required error={errors.billZip?.message}>
-                <Input id="billZip" className={inputClass} {...register("billZip")} />
+                <Input
+                  id="billZip"
+                  placeholder="PLZ"
+                  className={inputClass}
+                  {...register("billZip")}
+                />
               </Field>
               <Field id="billCity" label="Stadt" required error={errors.billCity?.message}>
-                <Input id="billCity" className={inputClass} {...register("billCity")} />
+                <Input
+                  id="billCity"
+                  placeholder="Stadt"
+                  className={inputClass}
+                  {...register("billCity")}
+                />
               </Field>
             </div>
           </div>
         )}
       </SectionCard>
 
-      {/* 3. Zahlungsart */}
-      <SectionCard step={3} title="Zahlungsart" icon={<CreditCard className="h-4 w-4" />}>
+      {/* Zahlungsart */}
+      <SectionCard
+        title="Zahlungsart"
+        icon={<CreditCard className="h-4 w-4" />}
+        hasError={paymentHasError}
+      >
         <RadioGroup
           value={paymentMethod}
           onValueChange={(v) => setValue("paymentMethod", v as "lastschrift" | "kreditkarte")}
@@ -361,6 +448,7 @@ export function CustomerForm() {
               >
                 <Input
                   id="accountHolder"
+                  placeholder="Kontoinhaber"
                   className={inputClass}
                   {...register("accountHolder")}
                 />
@@ -416,7 +504,8 @@ export function CustomerForm() {
                 {cardLinked ? "Kreditkarte hinterlegt ✓" : "Kreditkarte hinterlegen"}
               </Button>
               {errors.cardLinked && (
-                <p className="mt-2 text-xs font-medium text-destructive">
+                <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-destructive">
+                  <AlertCircle className="h-3.5 w-3.5" />
                   {errors.cardLinked.message}
                 </p>
               )}
@@ -425,8 +514,12 @@ export function CustomerForm() {
         </RadioGroup>
       </SectionCard>
 
-      {/* 4. Bedingungen */}
-      <SectionCard step={4} title="Bedingungen" icon={<FileText className="h-4 w-4" />}>
+      {/* Bedingungen */}
+      <SectionCard
+        title="Bedingungen"
+        icon={<FileText className="h-4 w-4" />}
+        hasError={termsHasError}
+      >
         <label
           htmlFor="acceptTerms"
           className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-secondary/40 p-3.5 transition-colors hover:border-primary/40"
@@ -454,7 +547,8 @@ export function CustomerForm() {
           </p>
         </label>
         {errors.acceptTerms && (
-          <p className="mt-2 text-xs font-medium text-destructive">
+          <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-destructive">
+            <AlertCircle className="h-3.5 w-3.5" />
             {errors.acceptTerms.message as string}
           </p>
         )}
@@ -480,7 +574,7 @@ export function CustomerForm() {
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
-        Mit dem Klick auf „Zahlungspflichtig bestellen" gehst du eine verbindliche Bestellung ein.
+        Mit Klick auf „Zahlungspflichtig bestellen" schließt du den Kauf verbindlich ab.
       </p>
     </form>
   );
