@@ -1,12 +1,26 @@
 import { Star } from "lucide-react";
 
+function TrustStar({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M12 1.5l2.92 7.36H22.5l-6.13 4.62 2.34 7.52L12 16.32l-6.71 4.68 2.34-7.52L1.5 8.86h7.58z" />
+    </svg>
+  );
+}
+
 export function TrustPanel() {
   return (
     <div className="animate-fade-in overflow-hidden rounded-2xl border border-primary/20 bg-[linear-gradient(135deg,#ffffff,oklch(0.99_0.015_160))] p-5 shadow-card">
       {/* Bewertung */}
       <div className="flex items-start gap-3">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-primary shadow-elegant">
-          <Star className="h-6 w-6 fill-white text-white" />
+          <TrustStar className="h-7 w-7 text-white" />
         </div>
         <div>
           <div className="flex items-center gap-1">
