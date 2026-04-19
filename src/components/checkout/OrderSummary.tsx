@@ -118,7 +118,7 @@ export function OrderSummary() {
         {/* Kostenaufschlüsselung */}
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between text-muted-foreground">
-            <dt>Bruttopreis</dt>
+            <dt>Bruttobetrag</dt>
             <dd className="font-numeric font-medium text-foreground">{formatEUR(prices.subtotalGross)}</dd>
           </div>
           <div className="flex justify-between text-muted-foreground">
