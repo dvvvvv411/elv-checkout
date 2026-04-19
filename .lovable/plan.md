@@ -1,28 +1,24 @@
 
 
-## Plan: TrustPanel — Animation, nur Firmenname, zackiger Stern
+## Plan: Sterne wieder schön + Footer-Layout fixen
 
-### Änderungen in `src/components/checkout/TrustPanel.tsx`
+### 1. Stern-Icon: zurück zu schöner Form
+Die aktuelle `SharpStar` SVG hat zu tiefe Einkerbungen → wirkt krakelig/dünn. Lösung: Lucide `Star` wieder verwenden (klassische, saubere Sternform), aber mit `fill-current` für solide Optik.
 
-**1. Footer-Zeile auf nur Firmenname**
-- `„NovaShop GmbH · Seit 2018 · Made in Germany"` → nur `NovaShop GmbH`.
-- Trennpunkte (`·`) und Zusatztexte komplett raus.
+- `SharpStar`-Komponente entfernen
+- Wieder `import { Star } from "lucide-react"` 
+- Bewertungssterne: `<Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />`
+- Großer Container-Stern: `<Star className="h-6 w-6 fill-white text-white" />`
+- Animation (`animate-star-pop` mit Delays) BLEIBT — die war gut.
 
-**2. Sterne-Lade-Animation (sequenziell)**
-- Aktuell: alle 5 Sterne nutzen `animate-count-up` mit Delay → fade-in von unten.
-- Neu: Pop-/Scale-Effekt, sequenziell von links nach rechts, deutlich sichtbarer.
-- Neue Keyframe in `src/styles.css`: `star-pop` — von `scale(0) rotate(-30deg) opacity:0` → kurz `scale(1.3)` → `scale(1) rotate(0) opacity:1` (cubic-bezier mit leichtem Overshoot).
-- Utility `.animate-star-pop { animation: star-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }`.
-- Im Panel: `animate-count-up` der 5 Sterne ersetzen durch `animate-star-pop`, Delays auf `i * 120ms` erhöhen für deutlicheres Sequenzing.
-- Die Zahl `4,9 / 5` bekommt zusätzlich Delay `~700ms` (nach letztem Stern) mit `animate-fade-in`.
-- Die Kunden-Zeile "Über 12.487..." Delay `~850ms`.
+### 2. Footer „NovaShop GmbH" — Whitespace fixen
+Aktuell: `mt-4 text-center` → riesiger Abstand + zentriert wirkt verloren.
 
-**3. Zackigerer Stern (Icon)**
-- Lucide `Star` ist relativ rund/weich. Ersetzen durch `Sparkle` oder besser: eigenes spitzes 5-Zack-SVG inline, mit längeren Spitzen und schmalerem Body.
-- Pragmatischer Weg: Lucide `Star` behalten, aber `strokeWidth={1}` + `className` mit `[clip-path]` ist zu fragil → stattdessen inline-SVG für ALLE 6 Sterne (großer Container-Stern + 5 Bewertungssterne) mit einem schärferen Pfad (klassischer 5-Zack mit tiefen Einkerbungen, z.B. innerer Radius ~0.38 statt Lucides ~0.5).
-- Als kleines wiederverwendbares `SharpStar`-SVG-Komponente oben in der Datei definieren, gleiche `className`-API wie Lucide-Icon.
+Neu: Firmenname kompakter und rechts neben/unter der Bewertung integrieren statt als separater Footer.
+- Variante: ganz weglassen aus dem Panel und stattdessen ans Ende von `OrderSummary` als kleine Zeile setzen → aber User wollte ihn ja im TrustPanel.
+- Bessere Variante: Direkt unter "Über 12.487 zufriedene Kunden" als verifizierter Hinweis: `„– NovaShop GmbH"` in `text-[10px] text-muted-foreground/70 mt-1` — links ausgerichtet, kein extra `mt-4`-Block.
+- Den separaten `<p className="mt-4 text-center ...">` Block komplett entfernen.
 
-### Geänderte Dateien
-- `src/components/checkout/TrustPanel.tsx` — Footer-Text, SharpStar-Komponente, neue Animation-Klassen + Delays
-- `src/styles.css` — neue Keyframe `star-pop` + Utility `.animate-star-pop`
+### Geänderte Datei
+- `src/components/checkout/TrustPanel.tsx`
 
