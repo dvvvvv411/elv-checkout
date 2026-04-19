@@ -1,0 +1,487 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Mail, Truck, CreditCard, FileText, Lock, Loader2, Building2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { SectionCard } from "./SectionCard";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const ibanRegex = /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/;
+
+const schema = z
+  .object({
+    email: z.string().trim().email("Bitte gültige E-Mail angeben").max(255),
+
+    // Lieferadresse
+    shipCompany: z.string().trim().max(100).optional(),
+    shipFirstName: z.string().trim().min(1, "Pflichtfeld").max(50),
+    shipLastName: z.string().trim().min(1, "Pflichtfeld").max(50),
+    shipPhone: z.string().trim().min(4, "Pflichtfeld").max(30),
+    shipStreet: z.string().trim().min(2, "Pflichtfeld").max(120),
+    shipZip: z.string().trim().min(4, "Pflichtfeld").max(10),
+    shipCity: z.string().trim().min(2, "Pflichtfeld").max(80),
+
+    billingSame: z.boolean(),
+
+    // Rechnungsadresse (optional, validiert wenn billingSame=false)
+    billCompany: z.string().trim().max(100).optional(),
+    billFirstName: z.string().trim().max(50).optional(),
+    billLastName: z.string().trim().max(50).optional(),
+    billStreet: z.string().trim().max(120).optional(),
+    billZip: z.string().trim().max(10).optional(),
+    billCity: z.string().trim().max(80).optional(),
+
+    paymentMethod: z.enum(["lastschrift", "kreditkarte"]),
+    iban: z.string().trim().optional(),
+    accountHolder: z.string().trim().optional(),
+    cardLinked: z.boolean().optional(),
+
+    acceptTerms: z.literal(true, {
+      errorMap: () => ({ message: "Bitte AGB & Datenschutz bestätigen" }),
+    }),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.billingSame) {
+      const required: Array<[keyof typeof data, string]> = [
+        ["billFirstName", "Pflichtfeld"],
+        ["billLastName", "Pflichtfeld"],
+        ["billStreet", "Pflichtfeld"],
+        ["billZip", "Pflichtfeld"],
+        ["billCity", "Pflichtfeld"],
+      ];
+      for (const [field, msg] of required) {
+        if (!data[field] || String(data[field]).trim().length < 1) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: msg });
+        }
+      }
+    }
+    if (data.paymentMethod === "lastschrift") {
+      if (!data.accountHolder || data.accountHolder.trim().length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["accountHolder"],
+          message: "Kontoinhaber angeben",
+        });
+      }
+      const iban = (data.iban ?? "").replace(/\s+/g, "").toUpperCase();
+      if (!ibanRegex.test(iban)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["iban"],
+          message: "Ungültige IBAN",
+        });
+      }
+    }
+    if (data.paymentMethod === "kreditkarte" && !data.cardLinked) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["cardLinked"],
+        message: "Bitte Kreditkarte hinterlegen",
+      });
+    }
+  });
+
+type FormValues = z.infer<typeof schema>;
+
+interface FieldProps {
+  id: string;
+  label: string;
+  error?: string;
+  required?: boolean;
+  children: React.ReactNode;
+  className?: string;
+}
+
+function Field({ id, label, error, required, children, className }: FieldProps) {
+  return (
+    <div className={cn("space-y-1.5", className)}>
+      <Label htmlFor={id} className="text-xs font-medium text-muted-foreground">
+        {label} {required && <span className="text-primary">*</span>}
+      </Label>
+      {children}
+      {error && <p className="text-xs font-medium text-destructive">{error}</p>}
+    </div>
+  );
+}
+
+export function CustomerForm() {
+  const [submitting, setSubmitting] = useState(false);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      email: "",
+      shipCompany: "",
+      shipFirstName: "",
+      shipLastName: "",
+      shipPhone: "",
+      shipStreet: "",
+      shipZip: "",
+      shipCity: "",
+      billingSame: true,
+      paymentMethod: "lastschrift",
+      iban: "",
+      accountHolder: "",
+      cardLinked: false,
+      acceptTerms: false as unknown as true,
+    },
+    mode: "onBlur",
+  });
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = form;
+
+  const billingSame = watch("billingSame");
+  const paymentMethod = watch("paymentMethod");
+  const cardLinked = watch("cardLinked");
+  const acceptTerms = watch("acceptTerms") as unknown as boolean;
+
+  const onSubmit = async (values: FormValues) => {
+    setSubmitting(true);
+    await new Promise((r) => setTimeout(r, 1100));
+    setSubmitting(false);
+    toast.success("Bestellung erfolgreich aufgegeben! 🎉", {
+      description: `Bestätigung wurde an ${values.email} gesendet.`,
+    });
+  };
+
+  const inputClass = "h-11 rounded-lg";
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {/* 1. Kontakt */}
+      <SectionCard step={1} title="Kontakt" icon={<Mail className="h-4 w-4" />}>
+        <Field id="email" label="E-Mail-Adresse" required error={errors.email?.message}>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="du@beispiel.de"
+            className={inputClass}
+            {...register("email")}
+          />
+        </Field>
+      </SectionCard>
+
+      {/* 2. Lieferadresse */}
+      <SectionCard step={2} title="Lieferadresse" icon={<Truck className="h-4 w-4" />}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field
+            id="shipCompany"
+            label="Firmenname (optional)"
+            error={errors.shipCompany?.message}
+            className="sm:col-span-2"
+          >
+            <Input id="shipCompany" className={inputClass} {...register("shipCompany")} />
+          </Field>
+          <Field id="shipFirstName" label="Vorname" required error={errors.shipFirstName?.message}>
+            <Input
+              id="shipFirstName"
+              autoComplete="given-name"
+              className={inputClass}
+              {...register("shipFirstName")}
+            />
+          </Field>
+          <Field id="shipLastName" label="Nachname" required error={errors.shipLastName?.message}>
+            <Input
+              id="shipLastName"
+              autoComplete="family-name"
+              className={inputClass}
+              {...register("shipLastName")}
+            />
+          </Field>
+          <Field
+            id="shipPhone"
+            label="Telefonnummer"
+            required
+            error={errors.shipPhone?.message}
+            className="sm:col-span-2"
+          >
+            <Input
+              id="shipPhone"
+              type="tel"
+              autoComplete="tel"
+              placeholder="+49 ..."
+              className={inputClass}
+              {...register("shipPhone")}
+            />
+          </Field>
+          <Field
+            id="shipStreet"
+            label="Straße und Hausnummer"
+            required
+            error={errors.shipStreet?.message}
+            className="sm:col-span-2"
+          >
+            <Input
+              id="shipStreet"
+              autoComplete="street-address"
+              className={inputClass}
+              {...register("shipStreet")}
+            />
+          </Field>
+          <Field id="shipZip" label="PLZ" required error={errors.shipZip?.message}>
+            <Input
+              id="shipZip"
+              autoComplete="postal-code"
+              className={inputClass}
+              {...register("shipZip")}
+            />
+          </Field>
+          <Field id="shipCity" label="Stadt" required error={errors.shipCity?.message}>
+            <Input
+              id="shipCity"
+              autoComplete="address-level2"
+              className={inputClass}
+              {...register("shipCity")}
+            />
+          </Field>
+        </div>
+
+        {/* Billing toggle */}
+        <label
+          htmlFor="billingSame"
+          className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-secondary/40 p-3.5 transition-colors hover:border-primary/40"
+        >
+          <Checkbox
+            id="billingSame"
+            checked={billingSame}
+            onCheckedChange={(c) => setValue("billingSame", c === true)}
+            className="mt-0.5"
+          />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-foreground">
+              Rechnungsadresse ist identisch mit Lieferadresse
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Deaktiviere diese Option, um eine abweichende Rechnungsadresse anzugeben.
+            </p>
+          </div>
+        </label>
+
+        {!billingSame && (
+          <div className="animate-slide-down mt-4 rounded-xl border border-dashed border-primary/30 bg-gradient-soft p-4">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Building2 className="h-4 w-4 text-primary" />
+              Abweichende Rechnungsadresse
+            </h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field
+                id="billCompany"
+                label="Firmenname (optional)"
+                error={errors.billCompany?.message}
+                className="sm:col-span-2"
+              >
+                <Input id="billCompany" className={inputClass} {...register("billCompany")} />
+              </Field>
+              <Field
+                id="billFirstName"
+                label="Vorname"
+                required
+                error={errors.billFirstName?.message}
+              >
+                <Input id="billFirstName" className={inputClass} {...register("billFirstName")} />
+              </Field>
+              <Field
+                id="billLastName"
+                label="Nachname"
+                required
+                error={errors.billLastName?.message}
+              >
+                <Input id="billLastName" className={inputClass} {...register("billLastName")} />
+              </Field>
+              <Field
+                id="billStreet"
+                label="Straße und Hausnummer"
+                required
+                error={errors.billStreet?.message}
+                className="sm:col-span-2"
+              >
+                <Input id="billStreet" className={inputClass} {...register("billStreet")} />
+              </Field>
+              <Field id="billZip" label="PLZ" required error={errors.billZip?.message}>
+                <Input id="billZip" className={inputClass} {...register("billZip")} />
+              </Field>
+              <Field id="billCity" label="Stadt" required error={errors.billCity?.message}>
+                <Input id="billCity" className={inputClass} {...register("billCity")} />
+              </Field>
+            </div>
+          </div>
+        )}
+      </SectionCard>
+
+      {/* 3. Zahlungsart */}
+      <SectionCard step={3} title="Zahlungsart" icon={<CreditCard className="h-4 w-4" />}>
+        <RadioGroup
+          value={paymentMethod}
+          onValueChange={(v) => setValue("paymentMethod", v as "lastschrift" | "kreditkarte")}
+          className="space-y-2.5"
+        >
+          {/* Lastschrift */}
+          <label
+            htmlFor="pm-lastschrift"
+            className={cn(
+              "flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-all",
+              paymentMethod === "lastschrift"
+                ? "border-primary bg-primary/5 shadow-sm"
+                : "border-border hover:border-primary/40",
+            )}
+          >
+            <RadioGroupItem value="lastschrift" id="pm-lastschrift" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">SEPA-Lastschrift</p>
+              <p className="text-xs text-muted-foreground">
+                Bequem & sicher direkt vom Konto abbuchen
+              </p>
+            </div>
+            <span className="rounded-md bg-trust/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-trust">
+              Beliebt
+            </span>
+          </label>
+
+          {paymentMethod === "lastschrift" && (
+            <div className="animate-slide-down ml-7 grid grid-cols-1 gap-4 rounded-xl border border-dashed border-primary/30 bg-gradient-soft p-4 sm:grid-cols-2">
+              <Field
+                id="accountHolder"
+                label="Kontoinhaber"
+                required
+                error={errors.accountHolder?.message}
+              >
+                <Input
+                  id="accountHolder"
+                  className={inputClass}
+                  {...register("accountHolder")}
+                />
+              </Field>
+              <Field id="iban" label="IBAN" required error={errors.iban?.message}>
+                <Input
+                  id="iban"
+                  placeholder="DE00 0000 0000 0000 0000 00"
+                  className={cn(inputClass, "font-mono tracking-wider")}
+                  {...register("iban")}
+                />
+              </Field>
+            </div>
+          )}
+
+          {/* Kreditkarte */}
+          <label
+            htmlFor="pm-card"
+            className={cn(
+              "flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-all",
+              paymentMethod === "kreditkarte"
+                ? "border-primary bg-primary/5 shadow-sm"
+                : "border-border hover:border-primary/40",
+            )}
+          >
+            <RadioGroupItem value="kreditkarte" id="pm-card" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">Kreditkarte</p>
+              <p className="text-xs text-muted-foreground">Visa, Mastercard, Amex</p>
+            </div>
+            <div className="flex gap-1">
+              <span className="rounded bg-foreground/5 px-1.5 py-0.5 text-[10px] font-bold text-foreground">
+                VISA
+              </span>
+              <span className="rounded bg-foreground/5 px-1.5 py-0.5 text-[10px] font-bold text-foreground">
+                MC
+              </span>
+            </div>
+          </label>
+
+          {paymentMethod === "kreditkarte" && (
+            <div className="animate-slide-down ml-7 rounded-xl border border-dashed border-primary/30 bg-gradient-soft p-4">
+              <Button
+                type="button"
+                onClick={() => {
+                  setValue("cardLinked", true);
+                  toast.success("Kreditkarte erfolgreich hinterlegt (Mockup)");
+                }}
+                variant="outline"
+                className="h-11 w-full rounded-lg border-primary/40 text-primary hover:bg-primary/5"
+              >
+                <CreditCard className="h-4 w-4" />
+                {cardLinked ? "Kreditkarte hinterlegt ✓" : "Kreditkarte hinterlegen"}
+              </Button>
+              {errors.cardLinked && (
+                <p className="mt-2 text-xs font-medium text-destructive">
+                  {errors.cardLinked.message}
+                </p>
+              )}
+            </div>
+          )}
+        </RadioGroup>
+      </SectionCard>
+
+      {/* 4. Bedingungen */}
+      <SectionCard step={4} title="Bedingungen" icon={<FileText className="h-4 w-4" />}>
+        <label
+          htmlFor="acceptTerms"
+          className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-secondary/40 p-3.5 transition-colors hover:border-primary/40"
+        >
+          <Checkbox
+            id="acceptTerms"
+            checked={acceptTerms}
+            onCheckedChange={(c) =>
+              setValue("acceptTerms", (c === true) as unknown as true, {
+                shouldValidate: true,
+              })
+            }
+            className="mt-0.5"
+          />
+          <p className="text-sm text-foreground">
+            Ich stimme den{" "}
+            <a href="#" className="font-medium text-primary underline-offset-2 hover:underline">
+              Allgemeinen Geschäftsbedingungen
+            </a>{" "}
+            und der{" "}
+            <a href="#" className="font-medium text-primary underline-offset-2 hover:underline">
+              Datenschutzerklärung
+            </a>{" "}
+            zu.
+          </p>
+        </label>
+        {errors.acceptTerms && (
+          <p className="mt-2 text-xs font-medium text-destructive">
+            {errors.acceptTerms.message as string}
+          </p>
+        )}
+      </SectionCard>
+
+      {/* CTA */}
+      <Button
+        type="submit"
+        disabled={submitting}
+        className="group relative h-14 w-full overflow-hidden rounded-2xl bg-gradient-primary text-base font-semibold text-primary-foreground shadow-elegant transition-all hover:shadow-glow hover:brightness-110 disabled:opacity-80"
+      >
+        {submitting ? (
+          <>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Bestellung wird verarbeitet...
+          </>
+        ) : (
+          <>
+            <Lock className="h-5 w-5" />
+            Zahlungspflichtig bestellen
+          </>
+        )}
+      </Button>
+
+      <p className="text-center text-xs text-muted-foreground">
+        Mit dem Klick auf „Zahlungspflichtig bestellen" gehst du eine verbindliche Bestellung ein.
+      </p>
+    </form>
+  );
+}
