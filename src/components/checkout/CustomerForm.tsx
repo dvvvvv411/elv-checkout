@@ -217,18 +217,20 @@ export function CustomerForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Kontakt */}
-      <SectionCard title="Kontakt" icon={<Mail className="h-4 w-4" />} hasError={contactHasError}>
-        <Field id="email" label="E-Mail-Adresse" required error={errors.email?.message}>
-          <Input
-            id="email"
-            type="email"
-            autoComplete="email"
-            placeholder="ihre@email.de"
-            className={inputClass}
-            {...reg("email")}
-          />
-        </Field>
-      </SectionCard>
+      <div className="animate-fade-in-down" style={{ animationDelay: "240ms", animationFillMode: "both" }}>
+        <SectionCard title="Kontakt" icon={<Mail className="h-4 w-4" />} hasError={contactHasError}>
+          <Field id="email" label="E-Mail-Adresse" required error={errors.email?.message}>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="ihre@email.de"
+              className={inputClass}
+              {...reg("email")}
+            />
+          </Field>
+        </SectionCard>
+      </div>
 
       {/* Lieferadresse */}
       <SectionCard
