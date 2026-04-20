@@ -133,7 +133,7 @@ export function CreditCardDialog({ open, onOpenChange, onSave, defaultCardholder
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="flex h-screen max-h-screen w-screen max-w-none flex-col overflow-y-auto rounded-none p-6 sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-md sm:rounded-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-primary" />

@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 
 import { SectionCard } from "./SectionCard";
+import { TrustPanel } from "./TrustPanel";
 import {
   CreditCardDialog,
   brandIcon,
@@ -479,7 +480,7 @@ export function CustomerForm() {
           </label>
 
           {paymentMethod === "lastschrift" && (
-            <div className="animate-slide-down ml-7 grid grid-cols-1 gap-4 rounded-xl border border-dashed border-border bg-secondary/40 p-4 sm:grid-cols-2">
+            <div className="animate-slide-down ml-0 grid grid-cols-1 gap-4 rounded-xl border border-dashed border-border bg-secondary/40 p-4 sm:grid-cols-2 lg:ml-7">
               <Field
                 id="accountHolder"
                 label="Kontoinhaber"
@@ -534,7 +535,7 @@ export function CustomerForm() {
           </label>
 
           {paymentMethod === "kreditkarte" && (
-            <div className="animate-slide-down ml-7 rounded-xl border border-dashed border-border bg-secondary/40 p-4">
+            <div className="animate-slide-down ml-0 rounded-xl border border-dashed border-border bg-secondary/40 p-4 lg:ml-7">
               {cardData ? (
                 <div className="flex items-center gap-4 rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-4">
                   <img
@@ -654,6 +655,10 @@ export function CustomerForm() {
           </>
         )}
       </Button>
+
+      <div className="lg:hidden">
+        <TrustPanel />
+      </div>
 
       </div>
       <CreditCardDialog
