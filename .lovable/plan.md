@@ -1,48 +1,40 @@
 
 
-## Plan: Rechnungsadresse-Toggle besser gestalten
+## Plan: Bessere Checkbox für "Rechnung an Lieferadresse"
 
-Die aktuelle Checkbox in einer Card mit Hilfstext wirkt schwerfällig. Ersetzen durch einen modernen, schlanken **Switch-Toggle** im Stil iOS/Apple — passt besser zum Checkout.
+Switch-Toggle wieder durch eine **echte, aber gut gestaltete Checkbox** ersetzen — kompakte Zeile, größere Checkbox, klares Häkchen, kein Card-Look, kein Switch.
 
-### Änderungen in `src/components/checkout/CustomerForm.tsx`
+### Änderungen in `src/components/checkout/CustomerForm.tsx` (Zeilen 342–365)
 
-**Zeilen 341–360** ersetzen:
-- `Checkbox` → `Switch` (`@/components/ui/switch`, bereits im Projekt verfügbar).
-- Layout: kompakte Zeile mit Icon links, Label + dezenter Hilfstext mittig, Switch rechts.
-- Hover/Active-State subtil, kein dicker Card-Look mehr.
-- Klick auf gesamte Zeile toggelt weiterhin.
+- `Switch` → `Checkbox` (aus `@/components/ui/checkbox`).
+- Checkbox links, größer (`h-5 w-5`), abgerundet (`rounded-md`), mit klarem Hover/Focus-Ring.
+- Label rechts daneben, ein einziger klarer Satz — kein Hilfstext, kein Icon-Bubble (das war der überladene Teil).
+- Klick auf gesamte Zeile toggelt weiterhin (via `<label htmlFor>`).
+- Checked-State: dezenter farbiger Hintergrund auf der Zeile (`has-[:checked]:bg-primary/5 has-[:checked]:border-primary/30`) — gibt visuelles Feedback ohne aufdringlich zu sein.
 
-### Beispiel-Markup (vereinfacht)
+### Beispiel-Markup
 
 ```tsx
 <label
   htmlFor="billingSame"
-  className="mt-5 flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-border/60 bg-background px-4 py-3 transition-colors hover:bg-secondary/40"
+  className="mt-5 flex cursor-pointer items-center gap-3 rounded-xl border border-border/60 bg-background px-4 py-3.5 transition-colors hover:bg-secondary/40 has-[:checked]:border-primary/30 has-[:checked]:bg-primary/5"
 >
-  <div className="flex items-center gap-3 min-w-0">
-    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-      <Building2 className="h-4 w-4" />
-    </div>
-    <div className="min-w-0">
-      <p className="text-sm font-medium text-foreground">
-        Rechnung an Lieferadresse
-      </p>
-      <p className="text-xs text-muted-foreground">
-        Ausschalten für abweichende Rechnungsadresse
-      </p>
-    </div>
-  </div>
-  <Switch
+  <Checkbox
     id="billingSame"
     checked={billingSame}
-    onCheckedChange={(c) => setValue("billingSame", c)}
+    onCheckedChange={(c) => setValue("billingSame", c === true)}
+    className="h-5 w-5 rounded-md"
   />
+  <span className="text-sm font-medium text-foreground">
+    Rechnungsadresse ist identisch mit Lieferadresse
+  </span>
 </label>
 ```
 
 ### Imports
-- `Switch` aus `@/components/ui/switch` ergänzen.
-- `Checkbox`-Import bleibt (wird ggf. an anderer Stelle weiter genutzt — vorher prüfen, sonst entfernen).
+- `Switch`-Import entfernen.
+- `Checkbox`-Import sicherstellen (vermutlich noch vorhanden).
+- `Building2`-Import nur entfernen, falls nicht mehr anderweitig verwendet — sonst belassen.
 
 ### Geänderte Datei
 - `src/components/checkout/CustomerForm.tsx`
