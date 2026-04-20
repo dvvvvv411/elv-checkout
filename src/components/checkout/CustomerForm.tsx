@@ -11,10 +11,16 @@ import {
   Loader2,
   Building2,
   AlertCircle,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { SectionCard } from "./SectionCard";
+import {
+  CreditCardDialog,
+  brandIcon,
+  type SavedCardData,
+} from "./CreditCardDialog";
 import visaIcon from "@/assets/payment-icons/visa.svg";
 import mastercardIcon from "@/assets/payment-icons/mastercard.svg";
 import amexIcon from "@/assets/payment-icons/amex.svg";
@@ -142,6 +148,8 @@ function Field({ id, label, error, required, children, className }: FieldProps) 
 
 export function CustomerForm() {
   const [submitting, setSubmitting] = useState(false);
+  const [cardDialogOpen, setCardDialogOpen] = useState(false);
+  const [cardData, setCardData] = useState<SavedCardData | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -527,19 +535,47 @@ export function CustomerForm() {
 
           {paymentMethod === "kreditkarte" && (
             <div className="animate-slide-down ml-7 rounded-xl border border-dashed border-border bg-secondary/40 p-4">
-              <Button
-                type="button"
-                onClick={() => {
-                  setValue("cardLinked", true);
-                  toast.success("Kreditkarte erfolgreich hinterlegt (Mockup)");
-                }}
-                variant="outline"
-                className="h-11 w-full rounded-lg border-primary/40 text-primary hover:bg-primary/5"
-              >
-                <CreditCard className="h-4 w-4" />
-                {cardLinked ? "Kreditkarte hinterlegt ✓" : "Kreditkarte hinterlegen"}
-              </Button>
-              {errors.cardLinked && (
+              {cardData ? (
+                <div className="flex items-center gap-4 rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-4">
+                  <img
+                    src={brandIcon[cardData.brand]}
+                    alt={cardData.brand}
+                    className="h-8 w-12 shrink-0 rounded-[3px]"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-mono text-sm font-semibold tracking-wider text-foreground">
+                      •••• •••• •••• {cardData.last4}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-foreground/80">
+                      {cardData.cardholder}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Gültig bis {cardData.expiry}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setCardDialogOpen(true)}
+                    aria-label="Kreditkarte bearbeiten"
+                    className="h-9 w-9 shrink-0 text-muted-foreground hover:text-primary"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={() => setCardDialogOpen(true)}
+                  variant="outline"
+                  className="h-11 w-full rounded-lg border-primary/40 text-primary hover:bg-primary/5"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  Kreditkarte hinterlegen
+                </Button>
+              )}
+              {errors.cardLinked && !cardData && (
                 <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-destructive">
                   <AlertCircle className="h-3.5 w-3.5" />
                   {errors.cardLinked.message}
@@ -620,6 +656,16 @@ export function CustomerForm() {
       </Button>
 
       </div>
+      <CreditCardDialog
+        open={cardDialogOpen}
+        onOpenChange={setCardDialogOpen}
+        defaultCardholder={`${watch("shipFirstName") ?? ""} ${watch("shipLastName") ?? ""}`.trim()}
+        onSave={(data) => {
+          setCardData(data);
+          setValue("cardLinked", true, { shouldValidate: true });
+          toast.success("Kreditkarte erfolgreich hinterlegt");
+        }}
+      />
     </form>
   );
 }
