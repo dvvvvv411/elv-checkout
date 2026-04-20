@@ -1,27 +1,18 @@
 
 
-## Plan: Store-Buttons durch einen einzigen generischen Download-Button ersetzen
+## Plan: Produktbeschreibung entfernen + CTA-Button umbenennen
 
-In `src/routes/confirmation.tsx` (Zone 2, App-Hero) die zwei Store-Buttons (App Store + Google Play) durch **einen** prominenten, generischen "App herunterladen"-Button ersetzen, der auf einen eigenen Server-Download zeigt.
+In `src/routes/confirmation.tsx` zwei kleine Anpassungen:
 
-### Änderungen in `src/routes/confirmation.tsx`
+### 1. Produktvariante (Beschreibung) ausblenden
+In der Items-Liste (Zone 3, ca. Zeile 304) die Zeile mit `item.variant` entfernen, sodass nur noch der Produkttitel (`item.name`) angezeigt wird. Die `variant`-Daten in `MOCK_ITEMS` bleiben unverändert (nicht stören) — nur das `<p>`-Element mit `truncate text-xs text-muted-foreground` wird gelöscht.
 
-**Buttons-Container ersetzen** (~Zeilen 192–238)
-- Beide `<a>`-Tags inkl. der App-Store- und Google-Play-SVGs komplett entfernen.
-- Stattdessen **ein** Button:
-  - Element: `<a href="#" download>` (Platzhalter-URL, später vom User mit echter Download-URL ersetzbar).
-  - Styling: solides, kontraststarkes CTA — `bg-foreground text-background`, `rounded-xl`, `px-5 py-3`, `shadow-elegant`, Hover-Scale (`hover:scale-[1.02]`), `transition-transform`.
-  - Volle Breite auf Mobile (`w-full`), auf Desktop kompakter (`sm:w-auto`).
-  - Inhalt: `Download`-Icon (lucide) + Label **"App herunterladen"** + kleiner Sub-Text "Direkt von NovaShop".
-  - Layout: `inline-flex items-center justify-center gap-3`.
-- Container von `flex-col gap-2.5 sm:flex-row` → einfacher Block, da nur noch 1 Button.
-
-**QR-Code-Block (Desktop, rechts)**
-- Bleibt erhalten, Label kann unverändert bleiben ("Jetzt scannen & herunterladen") — passt weiterhin, da QR ebenfalls auf den eigenen Download-Link zeigen würde.
+### 2. "Bestellung verfolgen" → "Liefertermin wählen"
+Im Actions-Bereich (Zone 3 unten, ca. Zeile 396) den Button-Text von **"Bestellung verfolgen"** zu **"Liefertermin wählen"** ändern. Icon `Truck` durch `Calendar` (lucide-react) ersetzen, da es jetzt um Terminwahl geht — passt thematisch besser und unterstützt die Dringlichkeits-Story (App-Download → Liefertermin wählen).
 
 ### Imports
-- **Neu**: `Download` aus `lucide-react`.
-- Keine Entfernungen nötig (Inline-SVGs verschwinden mit dem JSX).
+- **Neu**: `Calendar` aus `lucide-react`.
+- `Truck` bleibt erhalten (wird noch im Stepper verwendet).
 
 ### Geänderte Datei
 - `src/routes/confirmation.tsx`
