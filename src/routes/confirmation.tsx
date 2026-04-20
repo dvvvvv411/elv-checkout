@@ -311,8 +311,7 @@ function ConfirmationPage() {
                   </ol>
                 </div>
                 <p className="mt-5 rounded-lg bg-secondary/50 px-3 py-2 text-xs text-muted-foreground">
-                  Wir bereiten deine Bestellung gerade vor. Du erhältst eine E-Mail, sobald das Paket
-                  unterwegs ist.
+                  Deine Bestellung wurde erfolgreich aufgenommen und wird in Kürze bearbeitet.
                 </p>
               </SectionCard>
             </div>
