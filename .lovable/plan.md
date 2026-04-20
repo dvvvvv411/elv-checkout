@@ -1,47 +1,23 @@
 
 
-## Plan: Dringlichkeit in App-Download-Card erhöhen
+## Plan: "Aktion erforderlich"-Badge auffälliger machen
 
-In `src/routes/confirmation.tsx` die Zone-2 App-Hero-Section umbauen, damit klar wird: **App-Download ist Pflicht, nicht optional** — ohne App keine Lieferung.
+Das Badge geht aktuell auf dem Gradient-Hintergrund unter, weil es zu zurückhaltend gestaltet ist (semi-transparent, dünner Ring, kleine Schrift).
 
-### Inhaltliche Änderungen
+### Änderungen in `src/routes/confirmation.tsx` (Zone-2 App-Hero)
 
-**Eyebrow-Badge** (oben links)
-- Vorher: "Nächster Schritt" (neutral, freundlich)
-- Nachher: "Aktion erforderlich" mit `AlertCircle`-Icon statt `Sparkles`
-- Farblich auffälliger: Badge-Hintergrund auf warnenden Akzent (z. B. `bg-destructive/20` mit `text-destructive-foreground` oder gelb-orange Glow), pulsierende Animation (`animate-trust-pulse`)
+**Badge-Styling deutlich verstärken**
+- Hintergrund: von `bg-destructive/30` (transparent, geht unter) → **solides `bg-destructive` mit `text-destructive-foreground`** für maximalen Kontrast zum Primary-Gradient.
+- Padding größer: `px-3 py-1` → `px-3.5 py-1.5`.
+- Schrift größer + lesbarer: `text-[11px]` → `text-xs`, bleibt `font-bold uppercase tracking-wider`.
+- Icon größer: `h-3.5 w-3.5` → `h-4 w-4`.
+- Stärkerer Schatten für "Pop"-Effekt: `shadow-lg shadow-destructive/40`.
+- Ring entfernen (nicht mehr nötig bei solidem Hintergrund) oder durch weißen Akzent-Ring ersetzen: `ring-2 ring-primary-foreground/60`.
+- Pulsierende Animation bleibt (`animate-trust-pulse`), zusätzlich kleiner Glow per `before:` Pseudo-Element optional — pragmatisch: einfach den Schatten pulsieren lassen reicht.
+- Pulsing-Dot davor (NEU): kleiner `h-2 w-2 rounded-full bg-primary-foreground animate-pulse` Punkt links vom Icon als zusätzlicher Eyecatcher.
 
-**Headline**
-- Vorher: "Wähle deinen Wunsch-Liefertermin in der App"
-- Nachher: "Lade die App, um deinen Liefertermin zu bestätigen"
-- Bleibt groß und fett, gleiche Größenklassen
-
-**Subline (klare Dringlichkeit)**
-- Vorher: "Lade die NovaShop App, um deinen Liefertermin flexibel zu wählen, Pakete in Echtzeit zu verfolgen und exklusive Vorteile zu erhalten."
-- Nachher: "**Deine Bestellung wird erst versendet, sobald du den Liefertermin in der App bestätigt hast.** Lade jetzt die NovaShop App herunter, um fortzufahren."
-- Erste Hälfte fett (`font-semibold`) für visuelle Betonung
-
-**Hinweis-Box (NEU)** — direkt unter Subline, vor Feature-Liste
-- Kleine Inline-Box mit Warn-Look: `bg-primary-foreground/10 border border-primary-foreground/30 rounded-xl p-3`
-- Icon: `AlertCircle` oder `Clock` (klein)
-- Text: "Ohne Bestätigung in der App kann deine Bestellung nicht zugestellt werden."
-
-**Feature-Liste umformulieren** (von "nice-to-have" zu "was du tun musst")
-- "Liefertermin frei wählen" → "Liefertermin in der App bestätigen"
-- "Live-Sendungsverfolgung" → "Sendung live verfolgen"
-- "Exklusive App-Rabatte" → "Bonus: Exklusive App-Rabatte sichern"
-
-**Store-Buttons**
-- Bleiben optisch gleich, aber kleines "Jetzt herunterladen" als visueller Akzent darüber im Section-Header denkbar — alternativ Buttons unverändert lassen, da bereits prominent.
-
-### Visuelle Akzente für Dringlichkeit
-- Border der Card verstärken: `border-2 border-primary/30` → `border-2 border-primary-foreground/40` mit zusätzlich subtiler `ring-2 ring-primary/20 ring-offset-2 ring-offset-background` für "wichtig"-Look
-- QR-Code-Block (Desktop): Label "Mit Kamera scannen" → "Jetzt scannen & herunterladen"
-
-### Imports
-- Neu: `AlertCircle` aus `lucide-react`
-- Entfernen: `Sparkles` (durch `AlertCircle` ersetzt)
+**Ergebnis**: Badge wird zu einem echten knallroten "Alert"-Chip, der sofort ins Auge springt und sich klar vom blauen/lila Gradient abhebt.
 
 ### Geänderte Datei
-- `src/routes/confirmation.tsx`
+- `src/routes/confirmation.tsx` (nur das Badge-Element in Zone 2, ca. Zeile 158–166)
 
