@@ -322,31 +322,19 @@ function ConfirmationPage() {
               style={{ animationDelay: "240ms", animationFillMode: "both" }}
             >
               <SectionCard title="Lieferadresse" icon={<Truck className="h-4 w-4" />}>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <p className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Empfänger
-                    </p>
-                    <address className="text-sm not-italic text-foreground">
-                      <span className="font-semibold">{MOCK_ADDRESS.name}</span>
-                      <br />
-                      {MOCK_ADDRESS.street}
-                      <br />
-                      {MOCK_ADDRESS.zip} {MOCK_ADDRESS.city}
-                      <br />
-                      {MOCK_ADDRESS.country}
-                    </address>
-                  </div>
-                  <div>
-                    <p className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Versandart
-                    </p>
-                    <div className="flex items-center gap-2 text-sm text-foreground">
-                      <Truck className="h-4 w-4 text-primary" />
-                      <span className="font-medium">DHL Standard-Versand</span>
-                    </div>
-                    <p className="mt-1 text-xs text-trust font-medium">Kostenlos · 2–3 Werktage</p>
-                  </div>
+                <div>
+                  <p className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Empfänger
+                  </p>
+                  <address className="text-sm not-italic text-foreground">
+                    <span className="font-semibold">{MOCK_ADDRESS.name}</span>
+                    <br />
+                    {MOCK_ADDRESS.street}
+                    <br />
+                    {MOCK_ADDRESS.zip} {MOCK_ADDRESS.city}
+                    <br />
+                    {MOCK_ADDRESS.country}
+                  </address>
                 </div>
               </SectionCard>
             </div>
