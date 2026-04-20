@@ -8,8 +8,6 @@ import {
   Package,
   FileText,
   Check,
-  Smartphone,
-  QrCode,
   AlertCircle,
   Download,
   ChevronDown,
@@ -152,86 +150,64 @@ function ConfirmationPage() {
             <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary-glow opacity-30 blur-3xl" />
             <div className="absolute -bottom-32 -left-20 h-64 w-64 rounded-full bg-background/20 blur-3xl" />
 
-            <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-center">
-              <div className="lg:col-span-3">
-                <div className="inline-flex animate-trust-pulse items-center gap-2 rounded-full bg-warning px-3 py-1.5 text-warning-foreground shadow-lg shadow-warning/50 ring-1 ring-warning-foreground/20">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-warning-foreground" />
-                  <AlertCircle className="h-3.5 w-3.5 text-warning-foreground" strokeWidth={2.5} />
-                  <span className="text-xs font-bold uppercase tracking-wider text-warning-foreground">
-                    Aktion erforderlich
-                  </span>
-                </div>
-                <h2 className="mt-3 text-2xl font-bold leading-tight tracking-tight text-primary-foreground sm:text-3xl lg:text-4xl">
-                  Lade die App, um deinen Liefertermin zu bestätigen
-                </h2>
-                <p className="mt-3 max-w-xl text-sm text-primary-foreground/90">
-                  <span className="font-semibold text-primary-foreground">
-                    Deine Bestellung wird erst versendet, sobald du den Liefertermin in der App
-                    bestätigt hast.
-                  </span>{" "}
-                  Lade jetzt die NovaShop App herunter, um fortzufahren.
+            <div className="relative mx-auto flex max-w-2xl flex-col items-center text-center">
+              <div className="inline-flex animate-trust-pulse items-center gap-2 rounded-full bg-warning px-3 py-1.5 text-warning-foreground shadow-lg shadow-warning/50 ring-1 ring-warning-foreground/20">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-warning-foreground" />
+                <AlertCircle className="h-3.5 w-3.5 text-warning-foreground" strokeWidth={2.5} />
+                <span className="text-xs font-bold uppercase tracking-wider text-warning-foreground">
+                  Aktion erforderlich
+                </span>
+              </div>
+              <h2 className="mt-3 text-2xl font-bold leading-tight tracking-tight text-primary-foreground sm:text-3xl lg:text-4xl">
+                Lade die App, um deinen Liefertermin zu bestätigen
+              </h2>
+              <p className="mt-3 max-w-xl text-sm text-primary-foreground/90">
+                <span className="font-semibold text-primary-foreground">
+                  Deine Bestellung wird erst versendet, sobald du den Liefertermin in der App
+                  bestätigt hast.
+                </span>{" "}
+                Lade jetzt die NovaShop App herunter, um fortzufahren.
+              </p>
+
+              <div className="mt-4 flex max-w-md items-start gap-2.5 rounded-xl border border-primary-foreground/30 bg-primary-foreground/10 p-3 text-left backdrop-blur-sm">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary-foreground" />
+                <p className="text-xs font-medium text-primary-foreground">
+                  Ohne Bestätigung in der App kann deine Bestellung nicht zugestellt werden.
                 </p>
-
-                <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-primary-foreground/30 bg-primary-foreground/10 p-3 backdrop-blur-sm">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary-foreground" />
-                  <p className="text-xs font-medium text-primary-foreground">
-                    Ohne Bestätigung in der App kann deine Bestellung nicht zugestellt werden.
-                  </p>
-                </div>
-
-                <ul className="mt-4 space-y-2">
-                  {[
-                    "Liefertermin in der App bestätigen",
-                    "Sendung live verfolgen",
-                    "Bonus: Exklusive App-Rabatte sichern",
-                  ].map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-center gap-2.5 text-sm text-primary-foreground"
-                    >
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-foreground/20 backdrop-blur-sm">
-                        <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />
-                      </span>
-                      <span className="font-medium">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-5">
-                  <a
-                    href="#"
-                    download
-                    className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-foreground px-5 py-3 text-background shadow-elegant transition-transform hover:scale-[1.02] sm:w-auto"
-                  >
-                    <Download className="h-5 w-5" strokeWidth={2.5} />
-                    <div className="flex flex-col items-start leading-tight">
-                      <span className="text-base font-bold">App herunterladen</span>
-                      <span className="text-[10px] font-medium uppercase tracking-wider opacity-70">
-                        Direkt von NovaShop
-                      </span>
-                    </div>
-                  </a>
-                </div>
               </div>
 
-              <div className="hidden lg:col-span-2 lg:flex lg:flex-col lg:items-center lg:gap-3">
-                <div className="relative">
-                  <div className="absolute inset-0 animate-trust-pulse rounded-full bg-primary-foreground/20 blur-2xl" />
-                  <div className="relative flex h-28 w-28 items-center justify-center rounded-3xl bg-primary-foreground/15 backdrop-blur-sm">
-                    <Smartphone
-                      className="h-16 w-16 text-primary-foreground"
-                      strokeWidth={1.5}
-                    />
+              <ul className="mt-4 w-fit space-y-2 text-left">
+                {[
+                  "Liefertermin in der App bestätigen",
+                  "Sendung live verfolgen",
+                  "Bonus: Exklusive App-Rabatte sichern",
+                ].map((feature) => (
+                  <li
+                    key={feature}
+                    className="flex items-center gap-2.5 text-sm text-primary-foreground"
+                  >
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-foreground/20 backdrop-blur-sm">
+                      <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />
+                    </span>
+                    <span className="font-medium">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-5">
+                <a
+                  href="#"
+                  download
+                  className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-foreground px-5 py-3 text-background shadow-elegant transition-transform hover:scale-[1.02] sm:w-auto"
+                >
+                  <Download className="h-5 w-5" strokeWidth={2.5} />
+                  <div className="flex flex-col items-start leading-tight">
+                    <span className="text-base font-bold">App herunterladen</span>
+                    <span className="text-[10px] font-medium uppercase tracking-wider opacity-70">
+                      Direkt von NovaShop
+                    </span>
                   </div>
-                </div>
-                <div className="flex flex-col items-center gap-2 rounded-2xl bg-background/95 p-3 shadow-elegant backdrop-blur-sm">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-foreground">
-                    <QrCode className="h-16 w-16 text-background" strokeWidth={1.2} />
-                  </div>
-                  <p className="text-[11px] font-semibold text-foreground">
-                    Jetzt scannen & herunterladen
-                  </p>
-                </div>
+                </a>
               </div>
             </div>
           </section>
