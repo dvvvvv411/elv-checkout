@@ -656,7 +656,7 @@ export function CustomerForm() {
         )}
       </Button>
 
-      <div className="lg:hidden">
+      <div className="mt-4 lg:hidden">
         <TrustPanel />
       </div>
 
