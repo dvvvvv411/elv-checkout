@@ -74,7 +74,6 @@ export function OrderSummary() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-foreground">{item.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{item.variant}</p>
               </div>
               <div className="font-numeric text-sm font-semibold text-foreground">
                 {formatEUR(item.priceGross * item.quantity)}
