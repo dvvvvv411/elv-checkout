@@ -1,18 +1,26 @@
 
 
-## Plan: Produktbeschreibung entfernen + CTA-Button umbenennen
+## Plan: Desktop-Layout der App-Hero vereinfachen
 
-In `src/routes/confirmation.tsx` zwei kleine Anpassungen:
+In `src/routes/confirmation.tsx` (Zone 2, App-Hero) die rechte Spalte mit Smartphone-Icon und QR-Code auf Desktop entfernen. Der gesamte Inhalt rückt in eine einzelne, mittig zentrierte Spalte.
 
-### 1. Produktvariante (Beschreibung) ausblenden
-In der Items-Liste (Zone 3, ca. Zeile 304) die Zeile mit `item.variant` entfernen, sodass nur noch der Produkttitel (`item.name`) angezeigt wird. Die `variant`-Daten in `MOCK_ITEMS` bleiben unverändert (nicht stören) — nur das `<p>`-Element mit `truncate text-xs text-muted-foreground` wird gelöscht.
+### Änderungen
 
-### 2. "Bestellung verfolgen" → "Liefertermin wählen"
-Im Actions-Bereich (Zone 3 unten, ca. Zeile 396) den Button-Text von **"Bestellung verfolgen"** zu **"Liefertermin wählen"** ändern. Icon `Truck` durch `Calendar` (lucide-react) ersetzen, da es jetzt um Terminwahl geht — passt thematisch besser und unterstützt die Dringlichkeits-Story (App-Download → Liefertermin wählen).
+**Grid-Layout entfernen** (~Zeile 154)
+- `grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-center` → einfacher Block, mittig zentriert: `mx-auto max-w-2xl text-center` (oder `text-left` falls Inhalte linksbündig bleiben sollen — empfohlen: **mittig zentriert**, da User explizit "alles mittig zentriert" geschrieben hat).
 
-### Imports
-- **Neu**: `Calendar` aus `lucide-react`.
-- `Truck` bleibt erhalten (wird noch im Stepper verwendet).
+**Linke Spalte umbauen** (~Zeile 155)
+- Wrapper `lg:col-span-3` entfällt.
+- Inhalte zentrieren: Badge, Headline, Beschreibung, Warnhinweis-Box, Feature-Liste und Download-Button bekommen `mx-auto` bzw. `text-center` / `justify-center` wo nötig.
+- Feature-Liste (`<ul>`): `items-center` statt linksbündig, Liste selbst `inline-block` oder `mx-auto w-fit` damit Bullets zentriert wirken aber linksbündig lesbar bleiben.
+- Download-Button: bleibt `w-full sm:w-auto`, durch `mx-auto` zentriert.
+- Warnhinweis-Box (`Ohne Bestätigung...`): `max-w-md mx-auto`.
+
+**Rechte Spalte komplett entfernen** (~Zeilen mit Smartphone + QR-Code Block)
+- Den gesamten `<div className="hidden lg:col-span-2 lg:flex ...">`-Block löschen (Smartphone-Icon, QR-Code, Label "Jetzt scannen & herunterladen").
+
+**Imports bereinigen**
+- `Smartphone` und `QrCode` aus `lucide-react`-Import entfernen (werden nicht mehr verwendet).
 
 ### Geänderte Datei
 - `src/routes/confirmation.tsx`
