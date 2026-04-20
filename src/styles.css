@@ -32,6 +32,8 @@
   --color-trust: var(--trust);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -81,6 +83,9 @@
   --destructive: oklch(0.6 0.235 25);
   --destructive-foreground: oklch(0.99 0.005 25);
   --destructive-soft: oklch(0.97 0.03 25);
+  /* Warning: warm amber — passt zum Primary-Gradient, signalisiert Achtung */
+  --warning: oklch(0.85 0.17 88);
+  --warning-foreground: oklch(0.28 0.07 60);
   --border: oklch(0.92 0.01 160);
   --input: oklch(0.92 0.01 160);
   --ring: oklch(0.62 0.15 158);
@@ -126,6 +131,8 @@
   --trust: oklch(0.72 0.16 162);
   --destructive: oklch(0.7 0.19 22);
   --destructive-foreground: oklch(0.985 0.005 25);
+  --warning: oklch(0.82 0.16 88);
+  --warning-foreground: oklch(0.22 0.06 60);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.685 0.214 277);
