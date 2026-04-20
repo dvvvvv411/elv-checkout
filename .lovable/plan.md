@@ -1,38 +1,34 @@
 
 
-## Plan: Header aufräumen — Logo & Trust Badges
+## Plan: Karteninhaber-Pflichtfeld im Kreditkarten-Dialog
 
-In `src/components/checkout/CheckoutHeader.tsx`:
+Erweiterung des bereits geplanten `CreditCardDialog.tsx`: Feld **Karteninhaber** wird zum **Pflichtfeld** (statt optional).
 
-### 1. Logo
-- Den `<div>` mit dem grünen "N"-Quadrat (Gradient-Kreis) **entfernen**.
-- Nur den Text `Nova Shop` mit dem Gradient auf "Shop" beibehalten, etwas größer (`text-xl`) und gewichtiger (`font-bold tracking-tight`).
+### Änderungen
 
-### 2. Trust Badges — seriöser
-Aktuell: zwei pillenförmige, leicht bunte Badges (grün/teal Tönung). Wirken wie Marketing-Sticker.
+1. **`CreditCardDialog.tsx`** (neu, wie zuvor geplant) — Zod-Schema erweitern:
+   ```ts
+   cardholder: z.string().trim().min(2, "Name des Karteninhabers ist erforderlich").max(80),
+   ```
+   - Input-Feld `Karteninhaber` als erstes Feld im Dialog (über Kartennummer), `autoComplete="cc-name"`, Placeholder `Max Mustermann`.
+   - Validierung blockiert Speichern, wenn leer.
 
-Neuer Stil — dezent & seriös:
-- Kein farbiger Hintergrund mehr, kein farbiger Border.
-- Stattdessen schlichte Inline-Items: kleines Icon + Text in `text-muted-foreground`, `text-xs font-medium`.
-- Trennung durch dünnen vertikalen Divider (`<span className="h-4 w-px bg-border" />`) zwischen den Items statt zwei separate Pills.
-- Icons in `text-foreground/70`, leicht kleiner (`h-3.5 w-3.5`).
-- Auf Mobile: nur Icons sichtbar, Text ab `sm:` einblenden (wie bisher).
+2. **`CustomerForm.tsx`** — `cardData`-State erweitern:
+   ```ts
+   cardData: { last4, brand, expiry, cardholder } | null
+   ```
+   - In der Saved-Card-Anzeige zusätzlich den Karteninhaber-Namen klein über/unter der maskierten Nummer anzeigen.
 
-Beispielstruktur:
-```tsx
-<div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
-  <span className="flex items-center gap-1.5">
-    <Lock className="h-3.5 w-3.5" />
-    <span className="hidden sm:inline">SSL-verschlüsselt</span>
-  </span>
-  <span className="hidden h-4 w-px bg-border sm:block" />
-  <span className="flex items-center gap-1.5">
-    <ShieldCheck className="h-3.5 w-3.5" />
-    <span className="hidden sm:inline">Käuferschutz</span>
-  </span>
-</div>
+### Card-Design (aktualisiert)
+```
+┌─────────────────────────────────────────────┐
+│ [VISA]   •••• •••• •••• 4242        [✎]    │
+│          Max Mustermann                      │
+│          Gültig bis 12/27                    │
+└─────────────────────────────────────────────┘
 ```
 
-### Geänderte Datei
-- `src/components/checkout/CheckoutHeader.tsx`
+### Geänderte/neue Dateien
+- **neu**: `src/components/checkout/CreditCardDialog.tsx` (mit Karteninhaber-Pflichtfeld)
+- **geändert**: `src/components/checkout/CustomerForm.tsx`
 
