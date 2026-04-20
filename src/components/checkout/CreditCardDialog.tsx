@@ -61,7 +61,7 @@ const schema = z.object({
     .pipe(
       z
         .string()
-        .regex(/^\d{13,19}$/, "Bitte gültige Kartennummer angeben")
+        .regex(/^\d{1,16}$/, "Kartennummer darf maximal 16 Ziffern haben")
         .refine((v) => detectCardBrand(v) !== null, "Karte muss mit 3, 4 oder 5 beginnen"),
     ),
   expiry: z
@@ -87,7 +87,7 @@ interface Props {
 }
 
 const formatCardNumber = (raw: string) =>
-  (raw.replace(/\D/g, "").slice(0, 19).match(/.{1,4}/g) ?? []).join(" ");
+  (raw.replace(/\D/g, "").slice(0, 16).match(/.{1,4}/g) ?? []).join(" ");
 
 const formatExpiry = (raw: string) => {
   const d = raw.replace(/\D/g, "").slice(0, 4);
