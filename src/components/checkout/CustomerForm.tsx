@@ -148,6 +148,8 @@ function Field({ id, label, error, required, children, className }: FieldProps) 
 
 export function CustomerForm() {
   const [submitting, setSubmitting] = useState(false);
+  const [cardDialogOpen, setCardDialogOpen] = useState(false);
+  const [cardData, setCardData] = useState<SavedCardData | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
