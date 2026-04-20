@@ -1,84 +1,47 @@
 
 
-## Plan: `/confirmation` mobile-first neu strukturieren — klarer roter Faden
+## Plan: Dringlichkeit in App-Download-Card erhöhen
 
-Aktuell: 6+ separate Cards stapeln sich auf Mobile ohne Hierarchie (Erfolg → App-Hero → Lieferstatus → Adresse → Zahlung → Bestellübersicht → Trust). Das wirkt zusammengewürfelt.
+In `src/routes/confirmation.tsx` die Zone-2 App-Hero-Section umbauen, damit klar wird: **App-Download ist Pflicht, nicht optional** — ohne App keine Lieferung.
 
-Neue Idee: **Eine durchgehende Story in 3 klar getrennten Zonen**, mit reduzierten Card-Rändern auf Mobile und visuellen Verbindungen zwischen den Schritten.
+### Inhaltliche Änderungen
 
-### Neue Struktur (mobile-first)
+**Eyebrow-Badge** (oben links)
+- Vorher: "Nächster Schritt" (neutral, freundlich)
+- Nachher: "Aktion erforderlich" mit `AlertCircle`-Icon statt `Sparkles`
+- Farblich auffälliger: Badge-Hintergrund auf warnenden Akzent (z. B. `bg-destructive/20` mit `text-destructive-foreground` oder gelb-orange Glow), pulsierende Animation (`animate-trust-pulse`)
 
-```text
-┌─────────────────────────────────┐
-│ ZONE 1: Erfolg (kompakt)        │  ← schlanker, kein doppelter Stat-Block
-│  ✓ Bestellung bestätigt         │
-│  Bestellnr. + E-Mail inline     │
-└─────────────────────────────────┘
-            │ (vertikale Linie als roter Faden)
-┌─────────────────────────────────┐
-│ ZONE 2: APP-HERO (Hauptfokus)   │  ← bleibt prominent, etwas kompakter
-│  Wähle Liefertermin in der App  │
-│  [App Store] [Google Play]      │
-└─────────────────────────────────┘
-            │
-┌─────────────────────────────────┐
-│ ZONE 3: Deine Bestellung        │  ← EINE Card statt 4
-│  ─ Status-Stepper (kompakt)     │
-│  ─ Items-Liste                  │
-│  ─ Preis-Summary                │
-│  ─ Adresse (collapsible)        │
-│  ─ Zahlung (collapsible)        │
-│  [Rechnung PDF] [Verfolgen]     │
-└─────────────────────────────────┘
-            │
-   TrustPanel (klein, am Ende)
-   Footer
-```
+**Headline**
+- Vorher: "Wähle deinen Wunsch-Liefertermin in der App"
+- Nachher: "Lade die App, um deinen Liefertermin zu bestätigen"
+- Bleibt groß und fett, gleiche Größenklassen
 
-### Konkrete Änderungen in `src/routes/confirmation.tsx`
+**Subline (klare Dringlichkeit)**
+- Vorher: "Lade die NovaShop App, um deinen Liefertermin flexibel zu wählen, Pakete in Echtzeit zu verfolgen und exklusive Vorteile zu erhalten."
+- Nachher: "**Deine Bestellung wird erst versendet, sobald du den Liefertermin in der App bestätigt hast.** Lade jetzt die NovaShop App herunter, um fortzufahren."
+- Erste Hälfte fett (`font-semibold`) für visuelle Betonung
 
-**Zone 1 — Erfolgsbanner verschlanken**
-- Bestelldatum-Mini-Stat-Box entfernen (Datum nicht mehr nötig auf der Seite).
-- Bestellnummer-Pill und E-Mail in den Subtitle integrieren statt separater Box.
-- Padding auf Mobile reduzieren (`p-5 sm:p-8`).
-- Großes Check-Icon etwas kleiner auf Mobile (`h-16 w-16 sm:h-20 sm:w-20`).
+**Hinweis-Box (NEU)** — direkt unter Subline, vor Feature-Liste
+- Kleine Inline-Box mit Warn-Look: `bg-primary-foreground/10 border border-primary-foreground/30 rounded-xl p-3`
+- Icon: `AlertCircle` oder `Clock` (klein)
+- Text: "Ohne Bestätigung in der App kann deine Bestellung nicht zugestellt werden."
 
-**Zone 2 — App-Hero anpassen**
-- Eyebrow umformulieren: "Nächster Schritt" statt "Wichtig — nur noch ein Schritt".
-- Headline auf Mobile etwas kleiner (`text-2xl sm:text-3xl lg:text-4xl`).
-- Feature-Liste kompakter (kleinere Icons, engerer Abstand).
-- Padding reduziert (`p-5 sm:p-8`).
-- QR-Code-Block bleibt nur auf `lg`.
+**Feature-Liste umformulieren** (von "nice-to-have" zu "was du tun musst")
+- "Liefertermin frei wählen" → "Liefertermin in der App bestätigen"
+- "Live-Sendungsverfolgung" → "Sendung live verfolgen"
+- "Exklusive App-Rabatte" → "Bonus: Exklusive App-Rabatte sichern"
 
-**Zone 3 — NEU: Eine zusammenhängende "Deine Bestellung"-Card**
-- Statt `SectionCard` × 4 + sticky Sidebar-Card → **eine große Card** mit internen Sub-Sections (durch dünne Divider getrennt).
-- Auf Desktop (`lg:`) wird diese Card zur sticky-Sidebar mit gleicher Reihenfolge — kein 2-Spalten-Grid mehr nötig, vereinfacht das Layout massiv.
-- Innere Reihenfolge:
-  1. **Mini-Stepper** (kompakter, horizontal, Step-Labels nur auf `sm:` sichtbar).
-  2. **Items-Liste** (gleich wie bisher, kompakter Spacing).
-  3. **Preis-Aufschlüsselung** + großer Endbetrag.
-  4. **Lieferadresse** als Akkordeon (`Collapsible`, default geschlossen auf Mobile, offen auf `sm:`).
-  5. **Zahlungsart** als Akkordeon (gleiche Logik).
-  6. **Action-Buttons** (PDF + Verfolgen, full-width).
+**Store-Buttons**
+- Bleiben optisch gleich, aber kleines "Jetzt herunterladen" als visueller Akzent darüber im Section-Header denkbar — alternativ Buttons unverändert lassen, da bereits prominent.
 
-**Layout-Vereinfachung**
-- Kein 2-Spalten-Grid mehr (`lg:grid-cols-5` raus). Stattdessen **single-column max-w-2xl** zentriert für Zone 1 + 2 + 3, dann TrustPanel darunter.
-- Auf sehr großen Screens (`xl:`) optional `max-w-3xl` — bewusst schmal halten für Fokus.
-- Vertikale Spacing zwischen Zonen: `space-y-5 sm:space-y-6`.
+### Visuelle Akzente für Dringlichkeit
+- Border der Card verstärken: `border-2 border-primary/30` → `border-2 border-primary-foreground/40` mit zusätzlich subtiler `ring-2 ring-primary/20 ring-offset-2 ring-offset-background` für "wichtig"-Look
+- QR-Code-Block (Desktop): Label "Mit Kamera scannen" → "Jetzt scannen & herunterladen"
 
-**Visueller "roter Faden"**
-- Zwischen den Zonen kein sichtbarer Connector (zu kitschig), aber konsistente `rounded-3xl`, gleiche Border-Tokens, gleiche Shadow-Tiefe (`shadow-card`).
-- Animationen bleiben (`animate-fade-in-down` mit Delays 80/160/240ms — eine pro Zone statt pro Card).
-
-**Imports**
-- `Collapsible`, `CollapsibleTrigger`, `CollapsibleContent` aus `@/components/ui/collapsible` neu hinzufügen.
-- `ChevronDown` aus lucide-react für Akkordeon-Indikator.
-- `Calendar` entfernen (Datum-Stat raus).
-- `SectionCard` Import bleibt nicht nötig wenn nicht mehr verwendet — entfernen falls so.
+### Imports
+- Neu: `AlertCircle` aus `lucide-react`
+- Entfernen: `Sparkles` (durch `AlertCircle` ersetzt)
 
 ### Geänderte Datei
 - `src/routes/confirmation.tsx`
-
-### Ergebnis
-Statt 6+ gleichgewichtiger Cards auf Mobile gibt es nur noch **3 klare Zonen** in einer einzigen Spalte: Erfolg → App-CTA (Hauptfokus) → alle Bestelldetails gebündelt. Das schafft eine lesbare Top-Down-Story ohne visuelles Chaos.
 
