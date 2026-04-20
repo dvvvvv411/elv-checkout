@@ -88,17 +88,6 @@ function formatDate(date: Date): string {
   }).format(date);
 }
 
-function addBusinessDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  let added = 0;
-  while (added < days) {
-    result.setDate(result.getDate() + 1);
-    const day = result.getDay();
-    if (day !== 0 && day !== 6) added++;
-  }
-  return result;
-}
-
 function ConfirmationPage() {
   const orderNumber = useMemo(() => {
     const random = Math.floor(100000 + Math.random() * 900000);
@@ -106,7 +95,6 @@ function ConfirmationPage() {
   }, []);
 
   const today = new Date();
-  const deliveryDate = addBusinessDays(today, 3);
 
   const itemsGross = MOCK_ITEMS.reduce((sum, i) => sum + i.priceGross * i.quantity, 0);
   const prices = calculatePrices({
