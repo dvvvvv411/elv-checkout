@@ -175,7 +175,7 @@ export function CreditCardDialog({ open, onOpenChange, onSave, defaultCardholder
                 inputMode="numeric"
                 autoComplete="cc-number"
                 placeholder="1234 5678 9012 3456"
-                className={cn("h-11 rounded-lg pr-14 font-mono tracking-wider")}
+                className={cn("h-11 rounded-lg pr-14 tracking-wide")}
                 value={numberValue}
                 onChange={(e) =>
                   setValue("number", formatCardNumber(e.target.value), { shouldValidate: false })
@@ -210,7 +210,7 @@ export function CreditCardDialog({ open, onOpenChange, onSave, defaultCardholder
                 inputMode="numeric"
                 autoComplete="cc-exp"
                 placeholder="MM/YY"
-                className="h-11 rounded-lg font-mono"
+                className="h-11 rounded-lg"
                 value={expiryValue}
                 onChange={(e) =>
                   setValue("expiry", formatExpiry(e.target.value), { shouldValidate: false })
@@ -237,7 +237,7 @@ export function CreditCardDialog({ open, onOpenChange, onSave, defaultCardholder
                 autoComplete="cc-csc"
                 placeholder="123"
                 maxLength={4}
-                className="h-11 rounded-lg font-mono"
+                className="h-11 rounded-lg"
                 {...register("cvv")}
               />
               {errors.cvv && (
