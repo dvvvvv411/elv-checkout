@@ -11,10 +11,16 @@ import {
   Loader2,
   Building2,
   AlertCircle,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { SectionCard } from "./SectionCard";
+import {
+  CreditCardDialog,
+  brandIcon,
+  type SavedCardData,
+} from "./CreditCardDialog";
 import visaIcon from "@/assets/payment-icons/visa.svg";
 import mastercardIcon from "@/assets/payment-icons/mastercard.svg";
 import amexIcon from "@/assets/payment-icons/amex.svg";
