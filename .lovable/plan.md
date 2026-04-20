@@ -1,41 +1,64 @@
 
 
-## Plan: Bessere Checkbox für "Rechnung an Lieferadresse"
+## Plan: `/confirmation` Bestellbestätigungsseite
 
-Switch-Toggle wieder durch eine **echte, aber gut gestaltete Checkbox** ersetzen — kompakte Zeile, größere Checkbox, klares Häkchen, kein Card-Look, kein Switch.
+Neue Route nach erfolgreichem Checkout. Selber Look & Feel wie der Checkout (Cards, Gradient-Icons, Trust-Elemente, Animationen, deutsche Sprache, EUR-Formatierung).
 
-### Änderungen in `src/components/checkout/CustomerForm.tsx` (Zeilen 342–365)
+### Navigation aus dem Checkout
+- `src/components/checkout/CustomerForm.tsx`: Nach `await … setTimeout` per `useNavigate({ to: "/confirmation" })` weiterleiten (statt nur Toast). Toast bleibt als kurzes Feedback.
 
-- `Switch` → `Checkbox` (aus `@/components/ui/checkbox`).
-- Checkbox links, größer (`h-5 w-5`), abgerundet (`rounded-md`), mit klarem Hover/Focus-Ring.
-- Label rechts daneben, ein einziger klarer Satz — kein Hilfstext, kein Icon-Bubble (das war der überladene Teil).
-- Klick auf gesamte Zeile toggelt weiterhin (via `<label htmlFor>`).
-- Checked-State: dezenter farbiger Hintergrund auf der Zeile (`has-[:checked]:bg-primary/5 has-[:checked]:border-primary/30`) — gibt visuelles Feedback ohne aufdringlich zu sein.
+### Neue Datei: `src/routes/confirmation.tsx`
 
-### Beispiel-Markup
+Struktur (alles innerhalb `max-w-7xl` Layout, gleicher Header `<CheckoutHeader />` + Footer wie index):
 
+**1. Hero / Erfolgsbanner (full width)**
+- Gradient-Card (`bg-gradient-primary` Akzent) mit großem animierten Check-Icon (`CheckCircle2`, `animate-star-pop`).
+- Überschrift "Vielen Dank für deine Bestellung!" + Untertitel mit Bestellnummer (Mock: `NS-2026-XXXXXX`) und E-Mail-Hinweis ("Bestätigung an … gesendet").
+- Zwei Mini-Stats: Bestelldatum, voraussichtliche Lieferung (heute + 3 Werktage).
+
+**2. Grid 2-spaltig (lg), 1-spaltig mobile**
+
+Linke Spalte (lg:col-span-3):
+- **Lieferstatus-Card** mit horizontalem Stepper: `Bestellung eingegangen` ✓ → `In Bearbeitung` (aktiv, pulsierender Punkt) → `Versendet` → `Zugestellt`. Fortschrittslinie mit `bg-gradient-primary` bis zum aktiven Step.
+- **Lieferadresse-Card** (Truck-Icon): Mock-Adresse formatiert + "Standard-Versand DHL · 0,00 €".
+- **Zahlungsart-Card** (CreditCard-Icon): "SEPA-Lastschrift · DE•• •••• •••• •••• 1234" oder "Visa •••• 4242", Mandat-Hinweis.
+- **Was passiert als Nächstes?** Card mit 3 Schritten (Mail-Icon → Package-Icon → Truck-Icon), kurz erklärt.
+
+Rechte Spalte sticky (lg:col-span-2):
+- **Bestellübersicht-Card** (gleiche Mock-Items wie `OrderSummary`, gleiche Preisaufschlüsselung via `calculatePrices`, `formatEUR`).
+- **TrustPanel** darunter.
+- **Aktions-Buttons**: "Rechnung als PDF herunterladen" (outline, FileText-Icon, nur visuell), "Bestellung verfolgen" (primary).
+
+**3. Hilfe-Sektion (full width unten)**
+- 3-Spalten-Grid mit Cards: "Fragen zur Bestellung?" (Mail-Link), "Rückgabe & Umtausch" (30 Tage Hinweis), "Käuferschutz" (ShieldCheck).
+
+**4. CTA-Banner**
+- Card mit Gradient: "Weiter einkaufen" Button → `Link to="/"`.
+
+### Mock-Daten
+Inline im Route-File, gleiche Items wie `OrderSummary` (Wireless Kopfhörer + USB-C Kabel), gleicher VAT (19%). Bestellnummer per `useMemo` zufällig generiert beim Mount.
+
+### Styling-Konsistenz
+- `SectionCard` wiederverwenden für alle Detail-Cards.
+- Animationen: `animate-fade-in-down` mit gestaffelten `animationDelay` (80/160/240/320ms) wie auf index.
+- Tokens: `bg-gradient-primary`, `text-gradient-primary`, `shadow-card`, `text-trust`, `font-numeric`.
+
+### Route-Konfiguration
 ```tsx
-<label
-  htmlFor="billingSame"
-  className="mt-5 flex cursor-pointer items-center gap-3 rounded-xl border border-border/60 bg-background px-4 py-3.5 transition-colors hover:bg-secondary/40 has-[:checked]:border-primary/30 has-[:checked]:bg-primary/5"
->
-  <Checkbox
-    id="billingSame"
-    checked={billingSame}
-    onCheckedChange={(c) => setValue("billingSame", c === true)}
-    className="h-5 w-5 rounded-md"
-  />
-  <span className="text-sm font-medium text-foreground">
-    Rechnungsadresse ist identisch mit Lieferadresse
-  </span>
-</label>
+export const Route = createFileRoute("/confirmation")({
+  head: () => ({
+    meta: [
+      { title: "Bestellbestätigung — NovaShop" },
+      { name: "description", content: "Deine Bestellung wurde erfolgreich aufgegeben." },
+      { property: "og:title", content: "Bestellbestätigung — NovaShop" },
+      { property: "og:description", content: "Vielen Dank für deinen Einkauf bei NovaShop." },
+    ],
+  }),
+  component: ConfirmationPage,
+});
 ```
 
-### Imports
-- `Switch`-Import entfernen.
-- `Checkbox`-Import sicherstellen (vermutlich noch vorhanden).
-- `Building2`-Import nur entfernen, falls nicht mehr anderweitig verwendet — sonst belassen.
-
-### Geänderte Datei
-- `src/components/checkout/CustomerForm.tsx`
+### Geänderte / neue Dateien
+- **Neu**: `src/routes/confirmation.tsx`
+- **Edit**: `src/components/checkout/CustomerForm.tsx` — `useNavigate` Import + Redirect nach Submit.
 
