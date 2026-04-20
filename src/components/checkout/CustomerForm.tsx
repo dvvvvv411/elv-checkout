@@ -656,6 +656,16 @@ export function CustomerForm() {
       </Button>
 
       </div>
+      <CreditCardDialog
+        open={cardDialogOpen}
+        onOpenChange={setCardDialogOpen}
+        defaultCardholder={`${watch("shipFirstName") ?? ""} ${watch("shipLastName") ?? ""}`.trim()}
+        onSave={(data) => {
+          setCardData(data);
+          setValue("cardLinked", true, { shouldValidate: true });
+          toast.success("Kreditkarte erfolgreich hinterlegt");
+        }}
+      />
     </form>
   );
 }
