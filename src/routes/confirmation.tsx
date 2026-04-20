@@ -292,51 +292,6 @@ function ConfirmationPage() {
               </SectionCard>
             </div>
 
-            {/* Was passiert als Nächstes */}
-            <div
-              className="animate-fade-in-down"
-              style={{ animationDelay: "400ms", animationFillMode: "both" }}
-            >
-              <SectionCard title="Was passiert als Nächstes?" icon={<Clock className="h-4 w-4" />}>
-                <ol className="space-y-4">
-                  {[
-                    {
-                      icon: Mail,
-                      title: "Bestätigungs-E-Mail",
-                      desc: "Du erhältst in wenigen Minuten eine E-Mail mit allen Details zu deiner Bestellung.",
-                    },
-                    {
-                      icon: Package,
-                      title: "Wir verpacken deine Bestellung",
-                      desc: "Unser Team kommissioniert und verpackt deine Artikel sorgfältig — meist innerhalb von 24 Stunden.",
-                    },
-                    {
-                      icon: Truck,
-                      title: "Versand & Tracking",
-                      desc: "Sobald das Paket unterwegs ist, bekommst du eine Sendungsnummer zum Verfolgen.",
-                    },
-                  ].map((step, idx) => {
-                    const Icon = step.icon;
-                    return (
-                      <li key={idx} className="flex gap-4">
-                        <div className="relative">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                            <Icon className="h-5 w-5" />
-                          </div>
-                          <div className="font-numeric absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-primary text-[10px] font-bold text-primary-foreground shadow">
-                            {idx + 1}
-                          </div>
-                        </div>
-                        <div className="flex-1 pt-0.5">
-                          <p className="text-sm font-semibold text-foreground">{step.title}</p>
-                          <p className="mt-0.5 text-xs text-muted-foreground">{step.desc}</p>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </SectionCard>
-            </div>
           </div>
 
           {/* Right sticky column */}
