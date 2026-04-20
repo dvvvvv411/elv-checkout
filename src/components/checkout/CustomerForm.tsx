@@ -341,22 +341,26 @@ export function CustomerForm() {
         {/* Billing toggle */}
         <label
           htmlFor="billingSame"
-          className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-secondary/40 p-3.5 transition-colors hover:border-primary/40"
+          className="mt-5 flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-border/60 bg-background px-4 py-3 transition-colors hover:bg-secondary/40"
         >
-          <Checkbox
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Building2 className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">
+                Rechnung an Lieferadresse
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Ausschalten für abweichende Rechnungsadresse
+              </p>
+            </div>
+          </div>
+          <Switch
             id="billingSame"
             checked={billingSame}
-            onCheckedChange={(c) => setValue("billingSame", c === true)}
-            className="mt-0.5"
+            onCheckedChange={(c) => setValue("billingSame", c)}
           />
-          <div className="flex-1">
-            <p className="text-sm font-medium text-foreground">
-              Rechnungsadresse ist identisch mit Lieferadresse
-            </p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Deaktiviere diese Option, um eine abweichende Rechnungsadresse anzugeben.
-            </p>
-          </div>
         </label>
 
         {!billingSame && (
