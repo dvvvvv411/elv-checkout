@@ -28,7 +28,7 @@ import amexIcon from "@/assets/payment-icons/amex.svg";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
+
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -342,26 +342,17 @@ export function CustomerForm() {
         {/* Billing toggle */}
         <label
           htmlFor="billingSame"
-          className="mt-5 flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-border/60 bg-background px-4 py-3 transition-colors hover:bg-secondary/40"
+          className="mt-5 flex cursor-pointer items-center gap-3 rounded-xl border border-border/60 bg-background px-4 py-3.5 transition-colors hover:bg-secondary/40 has-[:checked]:border-primary/30 has-[:checked]:bg-primary/5"
         >
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Building2 className="h-4 w-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground">
-                Rechnung an Lieferadresse
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Ausschalten für abweichende Rechnungsadresse
-              </p>
-            </div>
-          </div>
-          <Switch
+          <Checkbox
             id="billingSame"
             checked={billingSame}
-            onCheckedChange={(c) => setValue("billingSame", c)}
+            onCheckedChange={(c) => setValue("billingSame", c === true)}
+            className="h-5 w-5 rounded-md"
           />
+          <span className="text-sm font-medium text-foreground">
+            Rechnungsadresse ist identisch mit Lieferadresse
+          </span>
         </label>
 
         {!billingSame && (
