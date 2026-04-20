@@ -156,7 +156,9 @@ export function OrderSummary() {
         </div>
       </div>
 
-      <TrustPanel />
+      <div className="hidden lg:block">
+        <TrustPanel />
+      </div>
     </aside>
   );
 }

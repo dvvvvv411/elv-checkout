@@ -45,19 +45,15 @@ function CheckoutPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-8">
-          {/* Linke Spalte 60% */}
-          <div className="lg:col-span-3">
-            <div
-              className="animate-fade-in-down"
-              style={{ animationDelay: "160ms", animationFillMode: "both" }}
-            >
-              <CheckoutProgress />
-            </div>
-            <CustomerForm />
+          <div
+            className="order-1 animate-fade-in-down lg:col-span-3"
+            style={{ animationDelay: "160ms", animationFillMode: "both" }}
+          >
+            <CheckoutProgress />
           </div>
 
-          {/* Rechte Spalte 40% — sticky auf Desktop */}
-          <div className="lg:col-span-2">
+          {/* Bestellung — auf Mobile direkt unter Progress, auf Desktop rechts */}
+          <div className="order-2 lg:order-3 lg:col-span-2">
             <div className="lg:sticky lg:top-24">
               <div
                 className="animate-fade-in-down"
@@ -66,6 +62,11 @@ function CheckoutPage() {
                 <OrderSummary />
               </div>
             </div>
+          </div>
+
+          {/* Formular */}
+          <div className="order-3 lg:order-2 lg:col-span-3">
+            <CustomerForm />
           </div>
         </div>
 
