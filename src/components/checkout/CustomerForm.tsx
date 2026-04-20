@@ -14,6 +14,7 @@ import {
   Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
 
 import { SectionCard } from "./SectionCard";
 import { TrustPanel } from "./TrustPanel";
@@ -149,6 +150,7 @@ function Field({ id, label, error, required, children, className }: FieldProps) 
 }
 
 export function CustomerForm() {
+  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [cardDialogOpen, setCardDialogOpen] = useState(false);
   const [cardData, setCardData] = useState<SavedCardData | null>(null);
@@ -219,6 +221,7 @@ export function CustomerForm() {
     toast.success("Bestellung erfolgreich aufgegeben! 🎉", {
       description: `Bestätigung wurde an ${values.email} gesendet.`,
     });
+    void navigate({ to: "/confirmation" });
   };
 
   const inputClass = "h-11 rounded-lg";
