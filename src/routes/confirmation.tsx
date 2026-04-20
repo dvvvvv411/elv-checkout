@@ -153,8 +153,8 @@ function ConfirmationPage() {
             </div>
           </div>
 
-          {/* Mini Stats */}
-          <div className="relative mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {/* Mini Stat */}
+          <div className="relative mt-6">
             <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/80 p-4 backdrop-blur-sm">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                 <Calendar className="h-5 w-5 text-primary" />
@@ -164,13 +164,96 @@ function ConfirmationPage() {
                 <p className="text-sm font-semibold text-foreground">{formatDate(today)}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/80 p-4 backdrop-blur-sm">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                <Clock className="h-5 w-5 text-primary" />
+          </div>
+        </section>
+
+        {/* App Download Hero — Hauptbestandteil */}
+        <section
+          className="animate-fade-in-down relative mt-6 overflow-hidden rounded-3xl border-2 border-primary/30 bg-gradient-primary p-6 shadow-elegant sm:p-10"
+          style={{ animationDelay: "120ms", animationFillMode: "both" }}
+        >
+          <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-primary-glow opacity-30 blur-3xl" />
+          <div className="absolute -bottom-32 -left-20 h-72 w-72 rounded-full bg-background/20 blur-3xl" />
+
+          <div className="relative grid grid-cols-1 gap-8 lg:grid-cols-5 lg:items-center">
+            <div className="lg:col-span-3">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary-foreground/15 px-3 py-1 backdrop-blur-sm">
+                <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-primary-foreground">
+                  Wichtig — nur noch ein Schritt
+                </span>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Voraussichtliche Lieferung</p>
-                <p className="text-sm font-semibold text-foreground">bis {formatDate(deliveryDate)}</p>
+              <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-primary-foreground sm:text-4xl lg:text-5xl">
+                Wähle deinen Wunsch-Liefertermin in der App
+              </h2>
+              <p className="mt-4 max-w-xl text-sm text-primary-foreground/85 sm:text-base">
+                Lade die NovaShop App herunter, um deinen Liefertermin flexibel zu wählen, Pakete in
+                Echtzeit zu verfolgen und exklusive Vorteile zu erhalten.
+              </p>
+
+              <ul className="mt-6 space-y-2.5">
+                {["Liefertermin frei wählen", "Live-Sendungsverfolgung", "Exklusive App-Rabatte"].map(
+                  (feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-center gap-3 text-sm text-primary-foreground sm:text-base"
+                    >
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-foreground/20 backdrop-blur-sm">
+                        <Check className="h-3.5 w-3.5 text-primary-foreground" strokeWidth={3} />
+                      </span>
+                      <span className="font-medium">{feature}</span>
+                    </li>
+                  ),
+                )}
+              </ul>
+
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href="#"
+                  className="flex items-center gap-3 rounded-xl bg-foreground px-5 py-3 text-background shadow-elegant transition-transform hover:scale-[1.02]"
+                >
+                  <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                  </svg>
+                  <div className="flex flex-col items-start leading-tight">
+                    <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">
+                      Download im
+                    </span>
+                    <span className="text-base font-bold">App Store</span>
+                  </div>
+                </a>
+                <a
+                  href="#"
+                  className="flex items-center gap-3 rounded-xl bg-foreground px-5 py-3 text-background shadow-elegant transition-transform hover:scale-[1.02]"
+                >
+                  <svg className="h-7 w-7" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="#34A853" d="M3.6 20.5 13.4 12 3.6 3.5C3.2 3.8 3 4.3 3 5v14c0 .7.2 1.2.6 1.5z" />
+                    <path fill="#FBBC04" d="m17.1 8.5-3.7 3.5 3.7 3.5 4.2-2.4c1.1-.6 1.1-2.2 0-2.9l-4.2-1.7z" />
+                    <path fill="#EA4335" d="M3.6 3.5 13.4 12l3.7-3.5L5.4 2.6c-.6-.4-1.3-.4-1.8.9z" />
+                    <path fill="#4285F4" d="M3.6 20.5 17.1 15.5l-3.7-3.5-9.8 8.5z" />
+                  </svg>
+                  <div className="flex flex-col items-start leading-tight">
+                    <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">
+                      Jetzt bei
+                    </span>
+                    <span className="text-base font-bold">Google Play</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            <div className="hidden lg:col-span-2 lg:flex lg:flex-col lg:items-center lg:gap-4">
+              <div className="relative">
+                <div className="absolute inset-0 animate-trust-pulse rounded-full bg-primary-foreground/20 blur-2xl" />
+                <div className="relative flex h-32 w-32 items-center justify-center rounded-3xl bg-primary-foreground/15 backdrop-blur-sm">
+                  <Smartphone className="h-20 w-20 text-primary-foreground" strokeWidth={1.5} />
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2 rounded-2xl bg-background/95 p-4 shadow-elegant backdrop-blur-sm">
+                <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-foreground">
+                  <QrCode className="h-20 w-20 text-background" strokeWidth={1.2} />
+                </div>
+                <p className="text-xs font-medium text-foreground">Scanne mit der Kamera</p>
               </div>
             </div>
           </div>
