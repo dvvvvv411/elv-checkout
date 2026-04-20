@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   CheckCircle2,
   Truck,
+  Calendar,
   CreditCard,
   Package,
   FileText,
@@ -309,7 +310,6 @@ function ConfirmationPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-foreground">{item.name}</p>
-                      <p className="truncate text-xs text-muted-foreground">{item.variant}</p>
                     </div>
                     <div className="font-numeric text-sm font-semibold text-foreground">
                       {formatEUR(item.priceGross * item.quantity)}
@@ -421,8 +421,8 @@ function ConfirmationPage() {
                 type="button"
                 className="w-full justify-center gap-2 bg-gradient-primary shadow-elegant"
               >
-                <Truck className="h-4 w-4" />
-                Bestellung verfolgen
+                <Calendar className="h-4 w-4" />
+                Liefertermin wählen
               </Button>
               <Button type="button" variant="outline" className="w-full justify-center gap-2">
                 <FileText className="h-4 w-4" />
