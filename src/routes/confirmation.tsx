@@ -316,7 +316,7 @@ function ConfirmationPage() {
                 </div>
               </dl>
               <div className="mt-4 flex items-end justify-between border-t border-border pt-4">
-                <span className="text-sm font-medium text-muted-foreground">Bezahlt</span>
+                <span className="text-sm font-medium text-muted-foreground">Betrag</span>
                 <span className="font-numeric text-3xl font-bold text-gradient-primary">
                   {formatEUR(prices.totalGross)}
                 </span>
