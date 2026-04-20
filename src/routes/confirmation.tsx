@@ -152,9 +152,10 @@ function ConfirmationPage() {
 
             <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-center">
               <div className="lg:col-span-3">
-                <div className="inline-flex animate-trust-pulse items-center gap-2 rounded-full bg-destructive/30 px-3 py-1 ring-1 ring-primary-foreground/40 backdrop-blur-sm">
-                  <AlertCircle className="h-3.5 w-3.5 text-primary-foreground" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-primary-foreground">
+                <div className="inline-flex animate-trust-pulse items-center gap-2 rounded-full bg-destructive px-3.5 py-1.5 text-destructive-foreground shadow-lg shadow-destructive/40 ring-2 ring-primary-foreground/60">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-primary-foreground" />
+                  <AlertCircle className="h-4 w-4 text-destructive-foreground" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-destructive-foreground">
                     Aktion erforderlich
                   </span>
                 </div>
