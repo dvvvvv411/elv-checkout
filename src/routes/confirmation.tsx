@@ -376,77 +376,7 @@ function ConfirmationPage() {
           </aside>
         </div>
 
-        {/* Help Section */}
-        <section
-          className="animate-fade-in-down mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3"
-          style={{ animationDelay: "480ms", animationFillMode: "both" }}
-        >
-          {[
-            {
-              icon: HelpCircle,
-              title: "Fragen zur Bestellung?",
-              desc: "Unser Support hilft dir gerne weiter — werktags von 8 bis 20 Uhr.",
-              cta: "Support kontaktieren",
-            },
-            {
-              icon: RotateCcw,
-              title: "Rückgabe & Umtausch",
-              desc: "30 Tage kostenlose Rückgabe — ohne Wenn und Aber.",
-              cta: "Mehr erfahren",
-            },
-            {
-              icon: ShieldCheck,
-              title: "Käuferschutz",
-              desc: "Deine Bestellung ist durch unseren Käuferschutz vollständig abgesichert.",
-              cta: "Details ansehen",
-            },
-          ].map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={idx}
-                className="group rounded-2xl border border-border bg-card p-5 shadow-card transition-all hover:border-primary/40 hover:shadow-elegant"
-              >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-gradient-primary group-hover:text-primary-foreground">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <h3 className="text-sm font-semibold text-foreground">{item.title}</h3>
-                <p className="mt-1 text-xs text-muted-foreground">{item.desc}</p>
-                <button
-                  type="button"
-                  className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                >
-                  {item.cta}
-                  <ArrowRight className="h-3 w-3" />
-                </button>
-              </div>
-            );
-          })}
-        </section>
 
-        {/* CTA Banner */}
-        <section
-          className="animate-fade-in-down mt-8 overflow-hidden rounded-3xl bg-gradient-primary p-8 text-center shadow-elegant sm:p-12"
-          style={{ animationDelay: "560ms", animationFillMode: "both" }}
-        >
-          <h2 className="text-2xl font-bold text-primary-foreground sm:text-3xl">
-            Entdecke noch mehr bei NovaShop
-          </h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-primary-foreground/90 sm:text-base">
-            Stöbere durch unser Sortiment und finde dein nächstes Lieblingsprodukt.
-          </p>
-          <Button
-            asChild
-            variant="secondary"
-            size="lg"
-            className="mt-6 gap-2 bg-background text-foreground shadow hover:bg-background/90"
-          >
-            <Link to="/">
-              Weiter einkaufen
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </section>
 
         <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} NovaShop · Sicherer Checkout · SSL-verschlüsselt
