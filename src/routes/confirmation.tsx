@@ -10,6 +10,7 @@ import {
   Smartphone,
   QrCode,
   AlertCircle,
+  Download,
   ChevronDown,
   MapPin,
 } from "lucide-react";
@@ -195,50 +196,18 @@ function ConfirmationPage() {
                   ))}
                 </ul>
 
-                <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
+                <div className="mt-5">
                   <a
                     href="#"
-                    className="flex items-center gap-3 rounded-xl bg-foreground px-4 py-2.5 text-background shadow-elegant transition-transform hover:scale-[1.02]"
+                    download
+                    className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-foreground px-5 py-3 text-background shadow-elegant transition-transform hover:scale-[1.02] sm:w-auto"
                   >
-                    <svg
-                      className="h-6 w-6"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-                    </svg>
+                    <Download className="h-5 w-5" strokeWidth={2.5} />
                     <div className="flex flex-col items-start leading-tight">
-                      <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">
-                        Download im
+                      <span className="text-base font-bold">App herunterladen</span>
+                      <span className="text-[10px] font-medium uppercase tracking-wider opacity-70">
+                        Direkt von NovaShop
                       </span>
-                      <span className="text-sm font-bold">App Store</span>
-                    </div>
-                  </a>
-                  <a
-                    href="#"
-                    className="flex items-center gap-3 rounded-xl bg-foreground px-4 py-2.5 text-background shadow-elegant transition-transform hover:scale-[1.02]"
-                  >
-                    <svg className="h-6 w-6" viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        fill="#34A853"
-                        d="M3.6 20.5 13.4 12 3.6 3.5C3.2 3.8 3 4.3 3 5v14c0 .7.2 1.2.6 1.5z"
-                      />
-                      <path
-                        fill="#FBBC04"
-                        d="m17.1 8.5-3.7 3.5 3.7 3.5 4.2-2.4c1.1-.6 1.1-2.2 0-2.9l-4.2-1.7z"
-                      />
-                      <path
-                        fill="#EA4335"
-                        d="M3.6 3.5 13.4 12l3.7-3.5L5.4 2.6c-.6-.4-1.3-.4-1.8.9z"
-                      />
-                      <path fill="#4285F4" d="M3.6 20.5 17.1 15.5l-3.7-3.5-9.8 8.5z" />
-                    </svg>
-                    <div className="flex flex-col items-start leading-tight">
-                      <span className="text-[10px] font-medium uppercase tracking-wider opacity-80">
-                        Jetzt bei
-                      </span>
-                      <span className="text-sm font-bold">Google Play</span>
                     </div>
                   </a>
                 </div>
