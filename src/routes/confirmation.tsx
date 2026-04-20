@@ -1,16 +1,11 @@
 import { useMemo } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   CheckCircle2,
   Truck,
   CreditCard,
-  Mail,
   Package,
   FileText,
-  ShieldCheck,
-  RotateCcw,
-  HelpCircle,
-  ArrowRight,
   Calendar,
   Clock,
   Check,
