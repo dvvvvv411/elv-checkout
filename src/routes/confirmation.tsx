@@ -9,7 +9,7 @@ import {
   Check,
   Smartphone,
   QrCode,
-  Sparkles,
+  AlertCircle,
   ChevronDown,
   MapPin,
 } from "lucide-react";
@@ -144,7 +144,7 @@ function ConfirmationPage() {
 
           {/* ZONE 2 — App-Hero (Hauptfokus) */}
           <section
-            className="animate-fade-in-down relative overflow-hidden rounded-3xl border-2 border-primary/30 bg-gradient-primary p-5 shadow-elegant sm:p-8"
+            className="animate-fade-in-down relative overflow-hidden rounded-3xl border-2 border-primary-foreground/40 bg-gradient-primary p-5 shadow-elegant ring-2 ring-primary/20 ring-offset-2 ring-offset-background sm:p-8"
             style={{ animationDelay: "160ms", animationFillMode: "both" }}
           >
             <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary-glow opacity-30 blur-3xl" />
@@ -152,25 +152,35 @@ function ConfirmationPage() {
 
             <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-center">
               <div className="lg:col-span-3">
-                <div className="inline-flex items-center gap-2 rounded-full bg-primary-foreground/15 px-3 py-1 backdrop-blur-sm">
-                  <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-primary-foreground">
-                    Nächster Schritt
+                <div className="inline-flex animate-trust-pulse items-center gap-2 rounded-full bg-destructive/30 px-3 py-1 ring-1 ring-primary-foreground/40 backdrop-blur-sm">
+                  <AlertCircle className="h-3.5 w-3.5 text-primary-foreground" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-primary-foreground">
+                    Aktion erforderlich
                   </span>
                 </div>
                 <h2 className="mt-3 text-2xl font-bold leading-tight tracking-tight text-primary-foreground sm:text-3xl lg:text-4xl">
-                  Wähle deinen Wunsch-Liefertermin in der App
+                  Lade die App, um deinen Liefertermin zu bestätigen
                 </h2>
-                <p className="mt-3 max-w-xl text-sm text-primary-foreground/85">
-                  Lade die NovaShop App, um deinen Liefertermin flexibel zu wählen, Pakete in
-                  Echtzeit zu verfolgen und exklusive Vorteile zu erhalten.
+                <p className="mt-3 max-w-xl text-sm text-primary-foreground/90">
+                  <span className="font-semibold text-primary-foreground">
+                    Deine Bestellung wird erst versendet, sobald du den Liefertermin in der App
+                    bestätigt hast.
+                  </span>{" "}
+                  Lade jetzt die NovaShop App herunter, um fortzufahren.
                 </p>
+
+                <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-primary-foreground/30 bg-primary-foreground/10 p-3 backdrop-blur-sm">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary-foreground" />
+                  <p className="text-xs font-medium text-primary-foreground">
+                    Ohne Bestätigung in der App kann deine Bestellung nicht zugestellt werden.
+                  </p>
+                </div>
 
                 <ul className="mt-4 space-y-2">
                   {[
-                    "Liefertermin frei wählen",
-                    "Live-Sendungsverfolgung",
-                    "Exklusive App-Rabatte",
+                    "Liefertermin in der App bestätigen",
+                    "Sendung live verfolgen",
+                    "Bonus: Exklusive App-Rabatte sichern",
                   ].map((feature) => (
                     <li
                       key={feature}
@@ -247,7 +257,9 @@ function ConfirmationPage() {
                   <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-foreground">
                     <QrCode className="h-16 w-16 text-background" strokeWidth={1.2} />
                   </div>
-                  <p className="text-[11px] font-medium text-foreground">Mit Kamera scannen</p>
+                  <p className="text-[11px] font-semibold text-foreground">
+                    Jetzt scannen & herunterladen
+                  </p>
                 </div>
               </div>
             </div>
