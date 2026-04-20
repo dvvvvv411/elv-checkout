@@ -7,8 +7,10 @@ import {
   Package,
   FileText,
   Calendar,
-  Clock,
   Check,
+  Smartphone,
+  QrCode,
+  Sparkles,
 } from "lucide-react";
 
 import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
