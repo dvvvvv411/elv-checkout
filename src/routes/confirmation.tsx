@@ -1,16 +1,11 @@
 import { useMemo } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   CheckCircle2,
   Truck,
   CreditCard,
-  Mail,
   Package,
   FileText,
-  ShieldCheck,
-  RotateCcw,
-  HelpCircle,
-  ArrowRight,
   Calendar,
   Clock,
   Check,
@@ -297,51 +292,6 @@ function ConfirmationPage() {
               </SectionCard>
             </div>
 
-            {/* Was passiert als Nächstes */}
-            <div
-              className="animate-fade-in-down"
-              style={{ animationDelay: "400ms", animationFillMode: "both" }}
-            >
-              <SectionCard title="Was passiert als Nächstes?" icon={<Clock className="h-4 w-4" />}>
-                <ol className="space-y-4">
-                  {[
-                    {
-                      icon: Mail,
-                      title: "Bestätigungs-E-Mail",
-                      desc: "Du erhältst in wenigen Minuten eine E-Mail mit allen Details zu deiner Bestellung.",
-                    },
-                    {
-                      icon: Package,
-                      title: "Wir verpacken deine Bestellung",
-                      desc: "Unser Team kommissioniert und verpackt deine Artikel sorgfältig — meist innerhalb von 24 Stunden.",
-                    },
-                    {
-                      icon: Truck,
-                      title: "Versand & Tracking",
-                      desc: "Sobald das Paket unterwegs ist, bekommst du eine Sendungsnummer zum Verfolgen.",
-                    },
-                  ].map((step, idx) => {
-                    const Icon = step.icon;
-                    return (
-                      <li key={idx} className="flex gap-4">
-                        <div className="relative">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                            <Icon className="h-5 w-5" />
-                          </div>
-                          <div className="font-numeric absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-primary text-[10px] font-bold text-primary-foreground shadow">
-                            {idx + 1}
-                          </div>
-                        </div>
-                        <div className="flex-1 pt-0.5">
-                          <p className="text-sm font-semibold text-foreground">{step.title}</p>
-                          <p className="mt-0.5 text-xs text-muted-foreground">{step.desc}</p>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </SectionCard>
-            </div>
           </div>
 
           {/* Right sticky column */}
@@ -426,77 +376,7 @@ function ConfirmationPage() {
           </aside>
         </div>
 
-        {/* Help Section */}
-        <section
-          className="animate-fade-in-down mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3"
-          style={{ animationDelay: "480ms", animationFillMode: "both" }}
-        >
-          {[
-            {
-              icon: HelpCircle,
-              title: "Fragen zur Bestellung?",
-              desc: "Unser Support hilft dir gerne weiter — werktags von 8 bis 20 Uhr.",
-              cta: "Support kontaktieren",
-            },
-            {
-              icon: RotateCcw,
-              title: "Rückgabe & Umtausch",
-              desc: "30 Tage kostenlose Rückgabe — ohne Wenn und Aber.",
-              cta: "Mehr erfahren",
-            },
-            {
-              icon: ShieldCheck,
-              title: "Käuferschutz",
-              desc: "Deine Bestellung ist durch unseren Käuferschutz vollständig abgesichert.",
-              cta: "Details ansehen",
-            },
-          ].map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={idx}
-                className="group rounded-2xl border border-border bg-card p-5 shadow-card transition-all hover:border-primary/40 hover:shadow-elegant"
-              >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-gradient-primary group-hover:text-primary-foreground">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <h3 className="text-sm font-semibold text-foreground">{item.title}</h3>
-                <p className="mt-1 text-xs text-muted-foreground">{item.desc}</p>
-                <button
-                  type="button"
-                  className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                >
-                  {item.cta}
-                  <ArrowRight className="h-3 w-3" />
-                </button>
-              </div>
-            );
-          })}
-        </section>
 
-        {/* CTA Banner */}
-        <section
-          className="animate-fade-in-down mt-8 overflow-hidden rounded-3xl bg-gradient-primary p-8 text-center shadow-elegant sm:p-12"
-          style={{ animationDelay: "560ms", animationFillMode: "both" }}
-        >
-          <h2 className="text-2xl font-bold text-primary-foreground sm:text-3xl">
-            Entdecke noch mehr bei NovaShop
-          </h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-primary-foreground/90 sm:text-base">
-            Stöbere durch unser Sortiment und finde dein nächstes Lieblingsprodukt.
-          </p>
-          <Button
-            asChild
-            variant="secondary"
-            size="lg"
-            className="mt-6 gap-2 bg-background text-foreground shadow hover:bg-background/90"
-          >
-            <Link to="/">
-              Weiter einkaufen
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </section>
 
         <footer className="mt-12 border-t border-border pt-6 text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} NovaShop · Sicherer Checkout · SSL-verschlüsselt
