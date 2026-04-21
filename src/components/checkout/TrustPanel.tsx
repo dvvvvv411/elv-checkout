@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { useOptionalCheckoutSession } from "@/lib/checkout-session-context";
 
 function TrustStar({ className }: { className?: string }) {
   return (
@@ -15,6 +16,9 @@ function TrustStar({ className }: { className?: string }) {
 }
 
 export function TrustPanel() {
+  const ctx = useOptionalCheckoutSession();
+  const companyName = ctx?.session.branding.company_name ?? "—";
+
   return (
     <div className="animate-fade-in overflow-hidden rounded-2xl border border-primary/20 bg-[linear-gradient(135deg,#ffffff,oklch(0.99_0.015_160))] p-5 shadow-card">
       {/* Bewertung */}
@@ -50,7 +54,7 @@ export function TrustPanel() {
             className="mt-1 animate-fade-in text-[10px] text-muted-foreground/70"
             style={{ animationDelay: "1000ms" }}
           >
-            – NovaShop GmbH
+            – {companyName}
           </p>
         </div>
       </div>

@@ -49,3 +49,16 @@ export function applyDiscountCode(code: string, subtotalGross: number): number {
   if (normalized === "SUMMER20") return subtotalGross * 0.2;
   return 0;
 }
+
+/**
+ * Leitet Netto und MwSt-Betrag aus einem Bruttobetrag und MwSt-Satz ab.
+ * Reine Anzeige-Helper — Server-Truth bleibt totalGross.
+ */
+export function breakdownFromTotal(
+  totalGross: number,
+  vatRate: number,
+): { totalNet: number; totalVat: number } {
+  const totalNet = totalGross / (1 + vatRate);
+  const totalVat = totalGross - totalNet;
+  return { totalNet, totalVat };
+}
