@@ -1,13 +1,12 @@
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
 import { CheckoutProgress } from "@/components/checkout/CheckoutProgress";
 import { CustomerForm } from "@/components/checkout/CustomerForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { Toaster } from "@/components/ui/sonner";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useCheckoutSession } from "@/hooks/use-checkout-session";
 import { CheckoutSessionProvider } from "@/lib/checkout-session-context";
 
@@ -107,32 +106,19 @@ function CheckoutPage() {
 
 function CheckoutLoadingState() {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Skeleton className="h-8 w-32" />
-          <Skeleton className="h-4 w-40" />
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="animate-fade-in flex flex-col items-center gap-5">
+        <div className="relative h-14 w-14">
+          <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl" aria-hidden />
+          <div className="absolute inset-0 rounded-full border-2 border-primary/15" />
+          <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-primary border-r-primary" />
+          <div className="absolute inset-0 m-auto h-2 w-2 animate-pulse rounded-full bg-primary" />
         </div>
-      </header>
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-8 space-y-2">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-4 w-48" />
+        <div className="text-center">
+          <p className="text-sm font-medium text-foreground">Checkout wird geladen</p>
+          <p className="mt-1 text-xs text-muted-foreground">Einen Moment bitte…</p>
         </div>
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          Checkout wird geladen…
-        </div>
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-8">
-          <div className="space-y-4 lg:col-span-3">
-            <Skeleton className="h-64 w-full rounded-2xl" />
-            <Skeleton className="h-96 w-full rounded-2xl" />
-          </div>
-          <div className="lg:col-span-2">
-            <Skeleton className="h-80 w-full rounded-2xl" />
-          </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }
