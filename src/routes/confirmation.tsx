@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   CheckCircle2,
@@ -23,48 +23,29 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Toaster } from "@/components/ui/sonner";
-import { calculatePrices, formatEUR } from "@/lib/checkout-utils";
+import { breakdownFromTotal, formatEUR } from "@/lib/checkout-utils";
 import { cn } from "@/lib/utils";
+import { useCheckoutSession } from "@/hooks/use-checkout-session";
+import { CheckoutSessionProvider } from "@/lib/checkout-session-context";
+import type { CheckoutSession } from "@/lib/checkout-types";
+
+type ConfirmationSearch = { token?: string };
 
 export const Route = createFileRoute("/confirmation")({
+  validateSearch: (search: Record<string, unknown>): ConfirmationSearch => ({
+    token: typeof search.token === "string" ? search.token : undefined,
+  }),
   head: () => ({
     meta: [
-      { title: "Bestellbestätigung — NovaShop" },
+      { title: "Bestellbestätigung" },
       {
         name: "description",
         content: "Deine Bestellung wurde erfolgreich aufgegeben. Vielen Dank für deinen Einkauf.",
-      },
-      { property: "og:title", content: "Bestellbestätigung — NovaShop" },
-      {
-        property: "og:description",
-        content: "Vielen Dank für deinen Einkauf bei NovaShop.",
       },
     ],
   }),
   component: ConfirmationPage,
 });
-
-const MOCK_ITEMS = [
-  {
-    id: "1",
-    name: "Premium Wireless Kopfhörer",
-    variant: "Mitternachtsschwarz",
-    quantity: 1,
-    priceGross: 79.99,
-    image: "🎧",
-  },
-  {
-    id: "2",
-    name: "Schnellladekabel USB-C",
-    variant: "2m, geflochten",
-    quantity: 2,
-    priceGross: 14.995,
-    image: "🔌",
-  },
-];
-
-const VAT_RATE = 0.19;
-const SHIPPING_GROSS = 0;
 
 const MOCK_ADDRESS = {
   name: "Max Mustermann",
@@ -86,21 +67,42 @@ const STEPS = [
 const ACTIVE_STEP = 1;
 
 function ConfirmationPage() {
+  const { data, token } = useCheckoutSession();
+
+  useEffect(() => {
+    if (data?.branding.company_name) {
+      document.title = `Bestellbestätigung — ${data.branding.company_name}`;
+    }
+  }, [data]);
+
+  if (data) {
+    return (
+      <CheckoutSessionProvider session={data} token={token}>
+        <ConfirmationContent session={data} />
+      </CheckoutSessionProvider>
+    );
+  }
+
+  // Fallback ohne Session: rendere ohne Provider (Header/TrustPanel zeigen "—")
+  return <ConfirmationContent session={null} />;
+}
+
+function ConfirmationContent({ session }: { session: CheckoutSession | null }) {
   const orderNumber = useMemo(() => {
     const random = Math.floor(100000 + Math.random() * 900000);
-    return `NS-2026-${random}`;
+    return `${new Date().getFullYear()}-${random}`;
   }, []);
 
   const [addressOpen, setAddressOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
 
-  const itemsGross = MOCK_ITEMS.reduce((sum, i) => sum + i.priceGross * i.quantity, 0);
-  const prices = calculatePrices({
-    itemsGross,
-    shippingGross: SHIPPING_GROSS,
-    discountGross: 0,
-    vatRate: VAT_RATE,
-  });
+  const products = session?.products ?? [];
+  const subtotalGross = products.reduce((sum, p) => sum + p.gross_price * p.quantity, 0);
+  const totalGross = session?.total_amount ?? 0;
+  const vatRate = session?.branding.vat_rate ?? 0;
+  const shippingCost = session?.shipping_cost ?? 0;
+  const companyName = session?.branding.company_name ?? "deinem Shop";
+  const { totalVat } = breakdownFromTotal(totalGross, vatRate);
 
   return (
     <div className="min-h-screen bg-background">
@@ -166,7 +168,7 @@ function ConfirmationPage() {
                   Deine Bestellung wird erst versendet, sobald du den Liefertermin in der App
                   bestätigt hast.
                 </span>{" "}
-                Lade jetzt die NovaShop App herunter, um fortzufahren.
+                Lade jetzt die App von {companyName} herunter, um fortzufahren.
               </p>
 
               <div className="mt-4 flex max-w-md items-start gap-2.5 rounded-xl border border-primary-foreground/30 bg-primary-foreground/10 p-3 text-left backdrop-blur-sm">
@@ -204,7 +206,7 @@ function ConfirmationPage() {
                   <div className="flex flex-col items-start leading-tight">
                     <span className="text-base font-bold">App herunterladen</span>
                     <span className="text-[10px] font-medium uppercase tracking-wider opacity-70">
-                      Direkt von NovaShop
+                      Direkt von {companyName}
                     </span>
                   </div>
                 </a>
@@ -212,12 +214,11 @@ function ConfirmationPage() {
             </div>
           </section>
 
-          {/* ZONE 3 — Deine Bestellung (alles in einer Card) */}
+          {/* ZONE 3 — Deine Bestellung */}
           <section
             className="animate-fade-in-down rounded-3xl border border-border bg-card shadow-card"
             style={{ animationDelay: "240ms", animationFillMode: "both" }}
           >
-            {/* Header */}
             <div className="flex items-center gap-2 border-b border-border px-5 py-4 sm:px-6">
               <Package className="h-4 w-4 text-primary" />
               <h2 className="text-base font-semibold text-foreground">Deine Bestellung</h2>
@@ -275,23 +276,27 @@ function ConfirmationPage() {
 
             {/* Items */}
             <div className="px-5 py-5 sm:px-6">
-              <ul className="space-y-3">
-                {MOCK_ITEMS.map((item) => (
-                  <li key={item.id} className="flex items-center gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        <span className="font-numeric font-medium text-muted-foreground">
-                          {item.quantity} ×
-                        </span>{" "}
-                        {item.name}
-                      </p>
-                    </div>
-                    <div className="font-numeric text-sm font-semibold text-foreground">
-                      {formatEUR(item.priceGross * item.quantity)}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {products.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Keine Artikelinformationen verfügbar.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {products.map((item, idx) => (
+                    <li key={`${item.name}-${idx}`} className="flex items-center gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-foreground">
+                          <span className="font-numeric font-medium text-muted-foreground">
+                            {item.quantity} ×
+                          </span>{" "}
+                          {item.name}
+                        </p>
+                      </div>
+                      <div className="font-numeric text-sm font-semibold text-foreground">
+                        {formatEUR(item.gross_price * item.quantity)}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="h-px bg-border" />
@@ -302,29 +307,35 @@ function ConfirmationPage() {
                 <div className="flex justify-between text-muted-foreground">
                   <dt>Zwischensumme</dt>
                   <dd className="font-numeric font-medium text-foreground">
-                    {formatEUR(prices.subtotalGross)}
+                    {formatEUR(subtotalGross)}
                   </dd>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <dt>Versand</dt>
-                  <dd className="font-medium text-trust">Kostenlos</dd>
+                  <dd className="font-medium">
+                    {shippingCost === 0 ? (
+                      <span className="text-trust">Kostenlos</span>
+                    ) : (
+                      <span className="font-numeric text-foreground">{formatEUR(shippingCost)}</span>
+                    )}
+                  </dd>
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <dt>MwSt ({Math.round(prices.vatRate * 100)}%)</dt>
-                  <dd className="font-numeric">{formatEUR(prices.totalVat)}</dd>
+                  <dt>MwSt ({Math.round(vatRate * 100)}%)</dt>
+                  <dd className="font-numeric">{formatEUR(totalVat)}</dd>
                 </div>
               </dl>
               <div className="mt-4 flex items-end justify-between border-t border-border pt-4">
                 <span className="text-sm font-medium text-muted-foreground">Betrag</span>
                 <span className="font-numeric text-3xl font-bold text-gradient-primary">
-                  {formatEUR(prices.totalGross)}
+                  {formatEUR(totalGross)}
                 </span>
               </div>
             </div>
 
             <div className="h-px bg-border" />
 
-            {/* Address — Collapsible */}
+            {/* Address */}
             <Collapsible open={addressOpen} onOpenChange={setAddressOpen}>
               <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-secondary/40 sm:px-6">
                 <div className="flex items-center gap-3">
@@ -358,7 +369,7 @@ function ConfirmationPage() {
 
             <div className="h-px bg-border" />
 
-            {/* Payment — Collapsible */}
+            {/* Payment */}
             <Collapsible open={paymentOpen} onOpenChange={setPaymentOpen}>
               <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-secondary/40 sm:px-6">
                 <div className="flex items-center gap-3">
@@ -381,7 +392,7 @@ function ConfirmationPage() {
                 <p className="ml-7 text-xs text-muted-foreground">
                   Der Betrag von{" "}
                   <span className="font-semibold text-foreground">
-                    {formatEUR(prices.totalGross)}
+                    {formatEUR(totalGross)}
                   </span>{" "}
                   wird in den nächsten 1–2 Werktagen von deinem Konto abgebucht.
                 </p>
@@ -416,7 +427,7 @@ function ConfirmationPage() {
         </div>
 
         <footer className="mt-10 border-t border-border pt-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} NovaShop · Sicherer Checkout · SSL-verschlüsselt
+          © {new Date().getFullYear()} {companyName} · Sicherer Checkout · SSL-verschlüsselt
         </footer>
       </main>
 
