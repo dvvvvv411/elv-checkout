@@ -18,7 +18,7 @@ export const Route = createFileRoute("/checkout")({
   }),
   head: () => ({
     meta: [
-      { title: "Sicher zur Kasse" },
+      { title: "Checkout" },
       {
         name: "description",
         content:
@@ -34,7 +34,7 @@ function CheckoutPage() {
 
   useEffect(() => {
     if (data?.branding.company_name) {
-      document.title = `Sicher zur Kasse — ${data.branding.company_name}`;
+      document.title = `Checkout – ${data.branding.company_name}`;
     }
   }, [data]);
 

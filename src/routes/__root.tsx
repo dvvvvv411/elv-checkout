@@ -29,20 +29,24 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Sicherer Checkout" },
+      {
+        name: "description",
+        content:
+          "Schnell, sicher und DSGVO-konform bezahlen — SSL-verschlüsselt mit Käuferschutz.",
+      },
+      { property: "og:title", content: "Sicherer Checkout" },
+      {
+        property: "og:description",
+        content:
+          "Schnell, sicher und DSGVO-konform bezahlen — SSL-verschlüsselt mit Käuferschutz.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
     ],
   }),
   shellComponent: RootShell,
