@@ -278,14 +278,13 @@ function ConfirmationPage() {
               <ul className="space-y-3">
                 {MOCK_ITEMS.map((item) => (
                   <li key={item.id} className="flex items-center gap-3">
-                    <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-soft text-xl">
-                      {item.image}
-                      <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground shadow">
-                        {item.quantity}
-                      </span>
-                    </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">{item.name}</p>
+                      <p className="truncate text-sm font-medium text-foreground">
+                        <span className="font-numeric font-medium text-muted-foreground">
+                          {item.quantity} ×
+                        </span>{" "}
+                        {item.name}
+                      </p>
                     </div>
                     <div className="font-numeric text-sm font-semibold text-foreground">
                       {formatEUR(item.priceGross * item.quantity)}
