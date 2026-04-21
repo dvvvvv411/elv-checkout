@@ -1,81 +1,77 @@
 
 
-## Plan: Dynamischer Checkout via Supabase Edge Function
+## Plan: `submit-order` Edge Function einbinden + dynamische Confirmation
 
-`/checkout` lädt Daten beim Mount via Token aus URL → Edge Function `get-checkout-session`. Branding (Firmenname, Logo, MwSt-Satz), Produkte, Versand und Gesamtbetrag kommen vom Backend. Netto/MwSt-€ werden client-seitig nur **angezeigt** (aus `total_amount` und `vat_rate`), nicht für Submit verwendet.
+Die Bestellung wird nach Submit an `submit-order` POSTed. Die `/confirmation`-Seite erhält die Order-Daten (Bestellnummer, App-Download-Link) sowie alle eingegebenen Customer/Address/Payment-Daten und stellt sie dynamisch dar. Token wird **nicht mehr** an Confirmation weitergegeben (Token ist nach Submit verbraucht → 410-Fehler beim erneuten Fetch).
 
-### 1. Datenflow & State
+### 1. API-Layer
 
-**Neuer Hook**: `src/hooks/use-checkout-session.ts`
-- Liest `token` aus `window.location.search` (kein Router-Validator, da Token optional & einfach).
-- `fetch("https://jpielhyfzzznicvcanci.supabase.co/functions/v1/get-checkout-session?token=" + token)`
-- Returnt `{ data, loading, error }` mit typisiertem `CheckoutSession`.
-- Fehlerstates: kein Token → `"missing_token"`, 400/404/410 → entsprechende Codes/Messages aus Response.
+**Neu: `src/lib/checkout-api.ts`**
+- `submitOrder(payload): Promise<SubmitOrderResponse>` — POST an `https://jpielhyfzzznicvcanci.supabase.co/functions/v1/submit-order`, JSON body, kein Auth-Header.
+- Fehler-Mapping analog zu `use-checkout-session.ts`: 400 → "Validierung fehlgeschlagen" (mit `details`), 404 → "Sitzung nicht gefunden", 410 → "Sitzung bereits verwendet", 405/500 → "Serverfehler".
+- Wirft `Error` mit lesbarer Message bei Non-2xx; gibt `{ success, order_number, app_download_url }` zurück.
 
-**Typen** (in `src/lib/checkout-types.ts`, neu):
-```ts
-type CheckoutSession = {
-  branding: { company_name: string; logo_url: string | null; vat_rate: number };
-  products: { name: string; gross_price: number; quantity: number }[];
-  shipping_cost: number;
-  total_amount: number;
-  currency: string;
-};
-```
+**Neu in `src/lib/checkout-types.ts`**: Typen `SubmitOrderRequest`, `SubmitOrderResponse`, `OrderConfirmationData` (= submitted Daten + Response, für Übergabe an Confirmation-Page).
 
-### 2. `src/routes/checkout.tsx` umbauen
-- Hook `useCheckoutSession()` aufrufen.
-- **Loading**: Skeleton-Layout (Header-Logo-Skeleton + zwei Karten-Skeletons via `Skeleton`-Komponente).
-- **Error**: Volle Error-Card mit passender Message (`Token fehlt`, `Session nicht gefunden`, `Session bereits verwendet`, `Unbekannter Fehler`) + Hinweis Shop neu zu öffnen.
-- **Success**: Session via React Context (`CheckoutSessionContext`, neu in `src/lib/checkout-session-context.tsx`) an `CheckoutHeader`, `OrderSummary`, `TrustPanel`, `CustomerForm` weitergeben.
+### 2. CustomerForm: echter Submit
 
-### 3. `CheckoutHeader.tsx` dynamisch
-- Wenn `logo_url` vorhanden: `<img src={logo_url} alt={company_name} className="h-8 w-auto object-contain">` statt `NovaShop`-Textlogo.
-- Wenn `logo_url` null: Fallback = `company_name` als Textlogo (ohne Gradient-Span, neutral fett).
-- Same für `/confirmation` (auch dort Hook nutzen falls Token weiter mitgegeben wird — siehe unten).
+`src/components/checkout/CustomerForm.tsx`
+- `onSubmit` umbauen:
+  - Token aus Context lesen → wenn fehlt: Toast-Error "Kein Checkout-Token", abbrechen.
+  - Payload mappen:
+    - `customer`: `email`, `company` (von `shipCompany`, leer → `null`), `first_name` = `shipFirstName`, `last_name` = `shipLastName`, `phone` = `shipPhone`.
+    - `billing`: wenn `billingSame` → `{ street: shipStreet, postal_code: shipZip, city: shipCity }`; sonst aus `bill*`-Feldern.
+    - `shipping`: wenn `billingSame` → `null`; sonst Lieferadresse aus `ship*`-Feldern (mit `company`, `first_name`, `last_name`, `street`, `postal_code`, `city`).
+    - `payment_method`: `"sepa"` (für `lastschrift`) oder `"card"` (für `kreditkarte`).
+    - `payment_data`: SEPA → `{ sepa: { account_holder, iban: iban.replace(/\s+/g,'') } }`. Card → `{ card: { cardholder_name, card_number, expiry, cvv } }` aus `cardData` (Felder werden im `CreditCardDialog` schon erfasst — siehe Punkt 3).
+  - `submitOrder()` aufrufen, bei Erfolg → `sessionStorage`-Schlüssel `checkout:lastOrder` mit `OrderConfirmationData` (eingegebene Customer/Adress/Payment-Anzeigewerte + `order_number` + `app_download_url` + Snapshot von `products`/`totals`/`branding`) befüllen, dann `navigate({ to: "/confirmation" })` (ohne Token).
+  - Fehlerfall: Toast `toast.error(message)`, Submit-Button wieder aktivieren.
 
-### 4. `OrderSummary.tsx` dynamisch
-- `MOCK_ITEMS`, `VAT_RATE`, `SHIPPING_GROSS` entfernen.
-- Items aus `session.products` rendern: `{quantity} × {name}` + `formatEUR(gross_price * quantity)`.
-- Versand aus `session.shipping_cost` (0 → „Kostenlos", sonst formatiert).
-- **Preisberechnung neu** in `src/lib/checkout-utils.ts`: Helferfunktion `breakdownFromTotal(totalGross, vatRate)` → `{ totalNet, totalVat }`. Subtotal = Summe Items, Total = `session.total_amount` (server-truth, **nicht** clientseitig neu summieren).
-- Anzeige: Bruttobetrag (Subtotal Items), Versand, Nettobetrag, MwSt (`vat_rate * 100`%), Gesamt = `total_amount`.
-- **Rabattcode-Block komplett entfernen** (Backend liefert keinen Discount → nicht mehr unterstützt in dieser Iteration).
+### 3. CreditCardDialog: vollständige Karten-Daten zurückgeben
 
-### 5. `TrustPanel.tsx` dynamisch
-- `– NovaShop GmbH` → `– {company_name}` aus Context.
+`src/components/checkout/CreditCardDialog.tsx`
+- `SavedCardData` um `card_number` (raw, ohne Leerzeichen) und `cvv` erweitern (für API-Submit zwingend).
+- `onSave` liefert die zusätzlichen Felder mit (intern bereits vorhanden, müssen nur durchgereicht werden).
+- Hinweis (technisch): rohe Kartendaten im Memory sind bewusst — der Endpoint erwartet sie genau so. Keine Persistierung außerhalb von React-State.
 
-### 6. `CustomerForm.tsx`
-- Im `onSubmit` statt `setTimeout` später echtes Backend-Call vorbereitet — in dieser Iteration: bleibt Mock, aber `total_amount` aus Session wird im Toast angezeigt.
-- Navigate zu `/confirmation` hängt Token mit dran: `navigate({ to: "/confirmation", search: { token } })` (damit Confirmation auch Branding hat).
+### 4. Confirmation-Seite dynamisch
 
-### 7. `/confirmation` (analog, kürzer)
-- `useCheckoutSession()` aufrufen, Header-Logo + Items + Preise + TrustPanel-Firmenname dynamisch.
-- Fallback wenn kein Token: weiter mit „—"-Platzhaltern (kein harter Error, da Page nach Bestellung steht).
-- `MOCK_ITEMS`/`VAT_RATE` raus, `App-Hero`-Block (Zone 2) bleibt unverändert (NovaShop-Text dort wird zu `{company_name}`).
-- Stepper, Adresse-Mock, Zahlungs-Mock bleiben (kommen nicht von dieser Edge Function).
+`src/routes/confirmation.tsx`
+- `validateSearch`/`useCheckoutSession` **entfernen** — Daten kommen jetzt aus `sessionStorage["checkout:lastOrder"]`.
+- Beim Mount: `useEffect` liest `sessionStorage`, parsed JSON, setzt State. Schlüssel danach **nicht** löschen (Reload soll funktionieren).
+- Wenn keine Daten gefunden → Empty-State-Card "Keine Bestelldaten gefunden — bitte starte eine neue Bestellung." (kein Crash).
+- Dynamisch ersetzen:
+  - **MOCK_EMAIL** → `order.customer.email`.
+  - **orderNumber** (aktuell zufällig generiert) → `order.order_number` aus API-Response.
+  - **MOCK_ADDRESS** in der Lieferadress-Collapsible → echte Daten: wenn `shipping` gesendet wurde, diese; sonst `billing` + Customer-Name als Lieferadresse. Anzeige: Name (+ Firma falls vorhanden), Straße, PLZ + Stadt, "Deutschland".
+  - **Zahlungsart-Collapsible**: SEPA → `IBAN: DE•• •••• <last4>` aus `iban`. Card → `<Brand> · •••• <last4>`.
+  - **App-Download-Button** (Zone 2): `href` = `order.app_download_url`. Wenn `null`: gesamte App-Hero-Section ausblenden (Backend hat keinen Link hinterlegt → kein Download-Block). Bestellungs-Erfolg + Stepper + Bestelldetails bleiben.
+  - **Branding** (`companyName`, Header-Logo): aus dem in `sessionStorage` gespeicherten `branding`-Snapshot — `CheckoutSessionProvider` mit der gespeicherten Session umhüllen, damit `CheckoutHeader` und `TrustPanel` weiter funktionieren.
+  - **Items / Pricing / VAT**: aus gespeichertem Session-Snapshot (gleiche Berechnungen wie bisher).
+- "Rechnung als PDF" + "Liefertermin wählen" Buttons bleiben als nicht-funktionale Demo-Buttons.
 
-### 8. Meta-Tags
-- Title in `checkout.tsx`/`confirmation.tsx`: `"Sicher zur Kasse"` bzw. `"Bestellbestätigung"` ohne Markenname (dynamischer Title via `useEffect` + `document.title` mit `company_name` nach Load).
+### 5. Checkout-Route
+
+`src/routes/checkout.tsx`
+- Keine Änderung nötig (Token-Handling für Submit liegt in CustomerForm).
 
 ### Geänderte / neue Dateien
-**Neu**:
-- `src/hooks/use-checkout-session.ts`
-- `src/lib/checkout-types.ts`
-- `src/lib/checkout-session-context.tsx`
 
-**Bearbeitet**:
-- `src/routes/checkout.tsx` (Loading/Error/Success-Wrapping, Provider)
-- `src/routes/confirmation.tsx` (Provider, dynamische Werte, Mocks raus)
-- `src/components/checkout/CheckoutHeader.tsx` (Logo dynamisch)
-- `src/components/checkout/OrderSummary.tsx` (Items/Preise/Versand dynamisch, Rabatt raus)
-- `src/components/checkout/TrustPanel.tsx` (Firmenname dynamisch)
-- `src/components/checkout/CustomerForm.tsx` (Token an Confirmation weitergeben)
-- `src/lib/checkout-utils.ts` (`breakdownFromTotal` Helfer)
+**Neu:**
+- `src/lib/checkout-api.ts` — `submitOrder()` Fetch-Wrapper + Fehler-Mapping.
+
+**Bearbeitet:**
+- `src/lib/checkout-types.ts` — `SubmitOrderRequest`, `SubmitOrderResponse`, `OrderConfirmationData`.
+- `src/components/checkout/CustomerForm.tsx` — echter API-Call, Payload-Mapping, sessionStorage-Übergabe, Navigate ohne Token.
+- `src/components/checkout/CreditCardDialog.tsx` — `SavedCardData` um `card_number` + `cvv` erweitern.
+- `src/routes/confirmation.tsx` — sessionStorage-Lesen, dynamische Adresse/Email/Zahlung/Bestellnr/App-Link, conditional App-Hero.
 
 ### Hinweise (technisch)
-- Edge Function ist öffentlich (keine Auth-Header) → einfacher `fetch`, keine Supabase-Client-Lib nötig.
-- CORS muss serverseitig in der Edge Function konfiguriert sein (`Access-Control-Allow-Origin: *` o.ä.) — falls Fehler im Browser auftreten, liegt es dort, nicht am Frontend.
-- Server-truth: `total_amount` wird unverändert angezeigt; `totalNet = total / (1 + vat_rate)`, `totalVat = total - totalNet` rein zur Anzeige.
-- Logo-URL: `object-contain` + `max-h-10`, damit beliebige Seitenverhältnisse sauber im Header sitzen.
+
+- `sessionStorage` (nicht `localStorage`): Daten verschwinden mit dem Tab → keine Datenleichen zwischen Sessions.
+- Token wird bewusst nicht zur Confirmation mitgegeben: nach `submit-order` ist er verbraucht (410). Branding/Items werden aus dem zum Submit-Zeitpunkt gespeicherten Snapshot bedient.
+- IBAN wird vor Submit von Leerzeichen befreit (Server normalisiert zwar — wir senden trotzdem sauber).
+- `shipping: null` wird **explizit** gesendet, wenn `billingSame`.
+- `app_download_url`-Check: Vor jeglicher Anzeige `if (order.app_download_url)` prüfen — bei `null` wird die ganze Aktions-Sektion ausgeblendet.
+- Card-Daten werden nur im React-State gehalten und bei Submit direkt an die API gegeben — keine Persistierung in Storage.
 
