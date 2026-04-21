@@ -1,38 +1,44 @@
 
 
-## Plan: Custom-Domain im Vite-Dev-Server erlauben
+## Plan: Moderner, mittig zentrierter Loading-State für /checkout
 
-Der Fehler `Blocked request. This host ("checkout.antpiregmbh.de") is not allowed.` kommt vom Host-Check des Vite-Dev-Servers. Die Custom-Domain muss in `server.allowedHosts` eingetragen werden.
+Den bestehenden Skeleton-Layout-Loader in `src/routes/checkout.tsx` durch einen vollflächig vertikal & horizontal zentrierten, modernen Loader ersetzen.
 
-### Änderung
+### Änderung in `CheckoutLoadingState` (`src/routes/checkout.tsx`)
 
-**`vite.config.ts`**
-- Zusätzliche Vite-Konfiguration via `defineConfig({ vite: { server: { allowedHosts: [...] } } })` ergänzen.
-- Eingetragen werden:
-  - `"checkout.antpiregmbh.de"` (die aktuell genutzte Custom-Domain)
-  - `".lovable.app"` (Subdomain-Wildcard für Lovable-Preview/Published-URLs, damit nichts bricht)
-  - `".antpiregmbh.de"` (Wildcard für weitere Subdomains derselben Hauptdomain, falls später z.B. `staging.checkout.antpiregmbh.de` dazukommt)
+Komplett ersetzen durch eine zentrierte Variante:
 
-### Resultat
+- **Container**: `min-h-screen` mit `flex items-center justify-center` → perfekt mittig (vertikal + horizontal), kein Header-/Skeleton-Gerüst mehr.
+- **Spinner-Element** (modern statt simples `Loader2`):
+  - Doppelter konzentrischer Ring: äußerer dezenter Ring `border-2 border-primary/15` als Track, innerer rotierender Ring `border-2 border-transparent border-t-primary border-r-primary` mit `animate-spin`, Größe `h-14 w-14`, `rounded-full`.
+  - Optional weicher Glow dahinter via `shadow-glow` + `blur`-Pseudo, damit's nach Brand-Style aussieht.
+  - Pulsierender Kern-Dot in der Mitte (`h-2 w-2 rounded-full bg-primary animate-pulse`).
+- **Text darunter**: kleiner, dezenter zweizeiliger Block:
+  - Zeile 1: „Checkout wird geladen" (`text-sm font-medium text-foreground`)
+  - Zeile 2: „Einen Moment bitte…" (`text-xs text-muted-foreground`)
+- **Eintritts-Animation**: `animate-fade-in` auf den Wrapper.
 
-```ts
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+### Bereinigung
+- `Skeleton`-Import in `checkout.tsx` entfernen (wird im Loading-State nicht mehr genutzt; an keiner anderen Stelle in der Datei verwendet).
+- `Loader2`-Import bleibt entfernt (durch CSS-Ringe ersetzt).
 
-export default defineConfig({
-  vite: {
-    server: {
-      allowedHosts: ["checkout.antpiregmbh.de", ".antpiregmbh.de", ".lovable.app"],
-    },
-  },
-});
+### Resultierendes Markup (vereinfacht)
+```tsx
+<div className="flex min-h-screen items-center justify-center bg-background px-4">
+  <div className="animate-fade-in flex flex-col items-center gap-5">
+    <div className="relative h-14 w-14">
+      <div className="absolute inset-0 rounded-full border-2 border-primary/15" />
+      <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-primary border-r-primary" />
+      <div className="absolute inset-0 m-auto h-2 w-2 animate-pulse rounded-full bg-primary" />
+    </div>
+    <div className="text-center">
+      <p className="text-sm font-medium text-foreground">Checkout wird geladen</p>
+      <p className="mt-1 text-xs text-muted-foreground">Einen Moment bitte…</p>
+    </div>
+  </div>
+</div>
 ```
 
-### Hinweise (technisch)
-
-- `allowedHosts` betrifft nur den Dev-/Preview-Server. Für das produktive Deployment (Cloudflare Worker / Published URL) ist diese Einstellung irrelevant.
-- Punkt-Prefix (`.antpiregmbh.de`) erlaubt alle Subdomains. Alternativ kann man `true` setzen, das deaktiviert den Schutz komplett — wird hier bewusst **nicht** gemacht (DNS-Rebinding-Schutz bleibt aktiv).
-- Die bestehenden, vom Lovable-Preset injizierten Server-Optionen (Port, Host, StrictPort, Sandbox-Detection) bleiben erhalten — `vite.server.allowedHosts` wird nur ergänzt, nichts überschrieben.
-
 ### Geänderte Datei
-- `vite.config.ts`
+- `src/routes/checkout.tsx` (nur `CheckoutLoadingState` + ungenutzte Imports)
 
