@@ -1,58 +1,14 @@
-import { useState } from "react";
-import { Tag, Package, Check } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { applyDiscountCode, calculatePrices, formatEUR } from "@/lib/checkout-utils";
+import { Package } from "lucide-react";
+import { breakdownFromTotal, formatEUR } from "@/lib/checkout-utils";
 import { TrustPanel } from "./TrustPanel";
-import { toast } from "sonner";
-
-// Mock-Daten — werden später vom Backend übergeben
-const MOCK_ITEMS = [
-  {
-    id: "1",
-    name: "Premium Wireless Kopfhörer",
-    variant: "Mitternachtsschwarz",
-    quantity: 1,
-    priceGross: 79.99,
-    image: "🎧",
-  },
-  {
-    id: "2",
-    name: "Schnellladekabel USB-C",
-    variant: "2m, geflochten",
-    quantity: 2,
-    priceGross: 14.995,
-    image: "🔌",
-  },
-];
-
-const VAT_RATE = 0.19; // vom Backend
-const SHIPPING_GROSS = 0; // 0 = Kostenlos
+import { useCheckoutSessionContext } from "@/lib/checkout-session-context";
 
 export function OrderSummary() {
-  const [code, setCode] = useState("");
-  const [appliedCode, setAppliedCode] = useState<string | null>(null);
-  const [discount, setDiscount] = useState(0);
+  const { session } = useCheckoutSessionContext();
+  const { branding, products, shipping_cost, total_amount } = session;
 
-  const itemsGross = MOCK_ITEMS.reduce((sum, i) => sum + i.priceGross * i.quantity, 0);
-
-  const prices = calculatePrices({
-    itemsGross,
-    shippingGross: SHIPPING_GROSS,
-    discountGross: discount,
-    vatRate: VAT_RATE,
-  });
-
-  const handleApply = () => {
-    const value = applyDiscountCode(code, itemsGross);
-    if (value > 0) {
-      setDiscount(value);
-      setAppliedCode(code.trim().toUpperCase());
-      toast.success(`Rabattcode aktiv — du sparst ${formatEUR(value)}`);
-    } else {
-      toast.error("Ungültiger Rabattcode");
-    }
-  };
+  const subtotalGross = products.reduce((sum, p) => sum + p.gross_price * p.quantity, 0);
+  const { totalNet, totalVat } = breakdownFromTotal(total_amount, branding.vat_rate);
 
   return (
     <aside className="space-y-4">
@@ -64,50 +20,22 @@ export function OrderSummary() {
         </h2>
 
         <ul className="space-y-3">
-          {MOCK_ITEMS.map((item) => (
-            <li key={item.id} className="flex items-center gap-3">
+          {products.map((item, idx) => (
+            <li key={`${item.name}-${idx}`} className="flex items-center gap-3">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-foreground">
-                  <span className="font-numeric font-medium text-muted-foreground">{item.quantity} ×</span>{" "}
+                  <span className="font-numeric font-medium text-muted-foreground">
+                    {item.quantity} ×
+                  </span>{" "}
                   {item.name}
                 </p>
               </div>
               <div className="font-numeric text-sm font-semibold text-foreground">
-                {formatEUR(item.priceGross * item.quantity)}
+                {formatEUR(item.gross_price * item.quantity)}
               </div>
             </li>
           ))}
         </ul>
-
-        {/* Rabattcode */}
-        <div className="mt-5">
-          <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <Tag className="h-3.5 w-3.5" />
-            Rabattcode
-          </label>
-          <div className="flex gap-2">
-            <Input
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Rabattcode"
-              className="h-10 rounded-lg"
-            />
-            <Button
-              type="button"
-              onClick={handleApply}
-              variant="outline"
-              className="h-10 shrink-0 rounded-lg border-primary/30 text-primary hover:bg-primary/5"
-            >
-              Einlösen
-            </Button>
-          </div>
-          {appliedCode && (
-            <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-trust">
-              <Check className="h-3.5 w-3.5" />
-              Code <span className="font-bold">{appliedCode}</span> aktiv
-            </p>
-          )}
-        </div>
 
         <div className="my-5 h-px bg-border" />
 
@@ -115,31 +43,25 @@ export function OrderSummary() {
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between text-muted-foreground">
             <dt>Bruttobetrag</dt>
-            <dd className="font-numeric font-medium text-foreground">{formatEUR(prices.subtotalGross)}</dd>
+            <dd className="font-numeric font-medium text-foreground">{formatEUR(subtotalGross)}</dd>
           </div>
           <div className="flex justify-between text-muted-foreground">
             <dt>Versand</dt>
             <dd className="font-medium">
-              {prices.shippingGross === 0 ? (
+              {shipping_cost === 0 ? (
                 <span className="text-trust">Kostenlos</span>
               ) : (
-                <span className="font-numeric text-foreground">{formatEUR(prices.shippingGross)}</span>
+                <span className="font-numeric text-foreground">{formatEUR(shipping_cost)}</span>
               )}
             </dd>
           </div>
-          {prices.discountGross > 0 && (
-            <div className="flex justify-between">
-              <dt className="text-trust">Rabatt</dt>
-              <dd className="font-numeric font-medium text-trust">−{formatEUR(prices.discountGross)}</dd>
-            </div>
-          )}
           <div className="flex justify-between text-xs text-muted-foreground">
             <dt>Nettobetrag</dt>
-            <dd className="font-numeric">{formatEUR(prices.totalNet)}</dd>
+            <dd className="font-numeric">{formatEUR(totalNet)}</dd>
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
-            <dt>MwSt ({Math.round(prices.vatRate * 100)}%)</dt>
-            <dd className="font-numeric">{formatEUR(prices.totalVat)}</dd>
+            <dt>MwSt ({Math.round(branding.vat_rate * 100)}%)</dt>
+            <dd className="font-numeric">{formatEUR(totalVat)}</dd>
           </div>
         </dl>
 
@@ -148,7 +70,7 @@ export function OrderSummary() {
         <div className="flex items-end justify-between">
           <span className="text-sm font-medium text-muted-foreground">Gesamt</span>
           <span className="font-numeric text-3xl font-bold text-gradient-primary">
-            {formatEUR(prices.totalGross)}
+            {formatEUR(total_amount)}
           </span>
         </div>
       </div>

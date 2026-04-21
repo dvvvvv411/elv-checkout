@@ -16,6 +16,8 @@ import {
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 
+import { useOptionalCheckoutSession } from "@/lib/checkout-session-context";
+import { formatEUR } from "@/lib/checkout-utils";
 import { SectionCard } from "./SectionCard";
 import { TrustPanel } from "./TrustPanel";
 import {
@@ -151,6 +153,9 @@ function Field({ id, label, error, required, children, className }: FieldProps) 
 
 export function CustomerForm() {
   const navigate = useNavigate();
+  const ctx = useOptionalCheckoutSession();
+  const totalAmount = ctx?.session.total_amount ?? null;
+  const token = ctx?.token ?? null;
   const [submitting, setSubmitting] = useState(false);
   const [cardDialogOpen, setCardDialogOpen] = useState(false);
   const [cardData, setCardData] = useState<SavedCardData | null>(null);
@@ -218,10 +223,14 @@ export function CustomerForm() {
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 1100));
     setSubmitting(false);
-    toast.success("Bestellung erfolgreich aufgegeben! 🎉", {
+    const amountSuffix = totalAmount !== null ? ` über ${formatEUR(totalAmount)}` : "";
+    toast.success(`Bestellung${amountSuffix} erfolgreich aufgegeben! 🎉`, {
       description: `Bestätigung wurde an ${values.email} gesendet.`,
     });
-    void navigate({ to: "/confirmation" });
+    void navigate({
+      to: "/confirmation",
+      search: token ? { token } : {},
+    });
   };
 
   const inputClass = "h-11 rounded-lg";
