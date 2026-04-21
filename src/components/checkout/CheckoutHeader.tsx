@@ -1,16 +1,30 @@
 import { ShieldCheck, Lock } from "lucide-react";
+import { useOptionalCheckoutSession } from "@/lib/checkout-session-context";
 
 export function CheckoutHeader() {
+  const ctx = useOptionalCheckoutSession();
+  const branding = ctx?.session.branding;
+  const companyName = branding?.company_name ?? "";
+  const logoUrl = branding?.logo_url ?? null;
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-3">
-          {/* Logo */}
-          <a href="/" className="flex items-center">
-            <span className="text-xl font-bold tracking-tight text-foreground">
-              Nova<span className="text-gradient-primary">Shop</span>
-            </span>
-          </a>
+          {/* Logo / Firmenname */}
+          <div className="flex items-center min-w-0">
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={companyName || "Logo"}
+                className="h-8 max-h-10 w-auto object-contain"
+              />
+            ) : (
+              <span className="truncate text-xl font-bold tracking-tight text-foreground">
+                {companyName || "\u00A0"}
+              </span>
+            )}
+          </div>
 
           {/* Trust Badges */}
           <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
