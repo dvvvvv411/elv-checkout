@@ -1,44 +1,33 @@
 
 
-## Plan: Moderner, mittig zentrierter Loading-State für /checkout
+## Plan: Favicon austauschen + Meta-Daten aktualisieren
 
-Den bestehenden Skeleton-Layout-Loader in `src/routes/checkout.tsx` durch einen vollflächig vertikal & horizontal zentrierten, modernen Loader ersetzen.
+### 1. Favicon einbinden
+- Hochgeladenes Bild (`checkout.png`) nach `public/favicon.png` kopieren.
+- In `src/routes/__root.tsx` das `links`-Array um `{ rel: "icon", type: "image/png", href: "/favicon.png" }` ergänzen.
 
-### Änderung in `CheckoutLoadingState` (`src/routes/checkout.tsx`)
+### 2. Globale Meta-Daten (`src/routes/__root.tsx`)
+Generische, zum Checkout-Produkt passende Defaults:
+- `title`: „Sicherer Checkout"
+- `description`: „Schnell, sicher und DSGVO-konform bezahlen — SSL-verschlüsselt mit Käuferschutz."
+- `og:title` / `og:description` analog
+- `author` von „Lovable" → entfernen oder neutralisieren
 
-Komplett ersetzen durch eine zentrierte Variante:
+### 3. Landing-Page (`src/routes/index.tsx`)
+- Bereits eigener `head()` mit passendem Titel — bleibt unverändert.
 
-- **Container**: `min-h-screen` mit `flex items-center justify-center` → perfekt mittig (vertikal + horizontal), kein Header-/Skeleton-Gerüst mehr.
-- **Spinner-Element** (modern statt simples `Loader2`):
-  - Doppelter konzentrischer Ring: äußerer dezenter Ring `border-2 border-primary/15` als Track, innerer rotierender Ring `border-2 border-transparent border-t-primary border-r-primary` mit `animate-spin`, Größe `h-14 w-14`, `rounded-full`.
-  - Optional weicher Glow dahinter via `shadow-glow` + `blur`-Pseudo, damit's nach Brand-Style aussieht.
-  - Pulsierender Kern-Dot in der Mitte (`h-2 w-2 rounded-full bg-primary animate-pulse`).
-- **Text darunter**: kleiner, dezenter zweizeiliger Block:
-  - Zeile 1: „Checkout wird geladen" (`text-sm font-medium text-foreground`)
-  - Zeile 2: „Einen Moment bitte…" (`text-xs text-muted-foreground`)
-- **Eintritts-Animation**: `animate-fade-in` auf den Wrapper.
+### 4. Checkout-Seite (`src/routes/checkout.tsx`)
+- Statischer `head().meta`-Title: `"Checkout"` (Fallback, solange Branding noch lädt).
+- Bestehender `useEffect`, der `document.title` setzt, wird angepasst auf Format:
+  `Checkout – ${data.branding.company_name}`
+  (Gedankenstrich „–" statt „—" und ohne „Sicher zur Kasse").
 
-### Bereinigung
-- `Skeleton`-Import in `checkout.tsx` entfernen (wird im Loading-State nicht mehr genutzt; an keiner anderen Stelle in der Datei verwendet).
-- `Loader2`-Import bleibt entfernt (durch CSS-Ringe ersetzt).
+### 5. Confirmation-Seite (`src/routes/confirmation.tsx`)
+- `head()`-Title prüfen, ggf. auf `"Bestellbestätigung"` setzen, falls noch generisch.
 
-### Resultierendes Markup (vereinfacht)
-```tsx
-<div className="flex min-h-screen items-center justify-center bg-background px-4">
-  <div className="animate-fade-in flex flex-col items-center gap-5">
-    <div className="relative h-14 w-14">
-      <div className="absolute inset-0 rounded-full border-2 border-primary/15" />
-      <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-primary border-r-primary" />
-      <div className="absolute inset-0 m-auto h-2 w-2 animate-pulse rounded-full bg-primary" />
-    </div>
-    <div className="text-center">
-      <p className="text-sm font-medium text-foreground">Checkout wird geladen</p>
-      <p className="mt-1 text-xs text-muted-foreground">Einen Moment bitte…</p>
-    </div>
-  </div>
-</div>
-```
-
-### Geänderte Datei
-- `src/routes/checkout.tsx` (nur `CheckoutLoadingState` + ungenutzte Imports)
+### Geänderte / neue Dateien
+- **Neu:** `public/favicon.png` (kopiert aus Upload)
+- **Bearbeitet:** `src/routes/__root.tsx` (Favicon-Link + globale Meta-Defaults)
+- **Bearbeitet:** `src/routes/checkout.tsx` (statischer + dynamischer Title im Format „Checkout – {Firma}")
+- **Bearbeitet:** `src/routes/confirmation.tsx` (Title-Check, ggf. anpassen)
 
