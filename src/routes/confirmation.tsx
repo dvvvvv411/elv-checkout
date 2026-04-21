@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   CheckCircle2,
   Truck,
@@ -12,6 +12,7 @@ import {
   Download,
   ChevronDown,
   MapPin,
+  ShoppingBag,
 } from "lucide-react";
 
 import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
@@ -25,16 +26,10 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 import { breakdownFromTotal, formatEUR } from "@/lib/checkout-utils";
 import { cn } from "@/lib/utils";
-import { useCheckoutSession } from "@/hooks/use-checkout-session";
 import { CheckoutSessionProvider } from "@/lib/checkout-session-context";
-import type { CheckoutSession } from "@/lib/checkout-types";
-
-type ConfirmationSearch = { token?: string };
+import type { OrderConfirmationData } from "@/lib/checkout-types";
 
 export const Route = createFileRoute("/confirmation")({
-  validateSearch: (search: Record<string, unknown>): ConfirmationSearch => ({
-    token: typeof search.token === "string" ? search.token : undefined,
-  }),
   head: () => ({
     meta: [
       { title: "Bestellbestätigung" },
@@ -47,16 +42,6 @@ export const Route = createFileRoute("/confirmation")({
   component: ConfirmationPage,
 });
 
-const MOCK_ADDRESS = {
-  name: "Max Mustermann",
-  street: "Hauptstraße 42",
-  zip: "10115",
-  city: "Berlin",
-  country: "Deutschland",
-};
-
-const MOCK_EMAIL = "max.mustermann@example.com";
-
 const STEPS = [
   { key: "received", label: "Eingegangen", icon: Check },
   { key: "processing", label: "Bearbeitung", icon: Package },
@@ -66,43 +51,107 @@ const STEPS = [
 
 const ACTIVE_STEP = 1;
 
+const BRAND_LABELS: Record<string, string> = {
+  visa: "Visa",
+  mastercard: "Mastercard",
+  amex: "American Express",
+};
+
 function ConfirmationPage() {
-  const { data, token } = useCheckoutSession();
+  const [order, setOrder] = useState<OrderConfirmationData | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    if (data?.branding.company_name) {
-      document.title = `Bestellbestätigung — ${data.branding.company_name}`;
+    try {
+      const raw = sessionStorage.getItem("checkout:lastOrder");
+      if (raw) setOrder(JSON.parse(raw) as OrderConfirmationData);
+    } catch {
+      // ignore
     }
-  }, [data]);
+    setHydrated(true);
+  }, []);
 
-  if (data) {
+  useEffect(() => {
+    if (order?.session.branding.company_name) {
+      document.title = `Bestellbestätigung — ${order.session.branding.company_name}`;
+    }
+  }, [order]);
+
+  if (!hydrated) {
+    return <div className="min-h-screen bg-background" />;
+  }
+
+  if (!order) {
     return (
-      <CheckoutSessionProvider session={data} token={token}>
-        <ConfirmationContent session={data} />
-      </CheckoutSessionProvider>
+      <div className="min-h-screen bg-background">
+        <main className="mx-auto flex max-w-md flex-col items-center px-4 py-20 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+            <ShoppingBag className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h1 className="text-xl font-semibold text-foreground">Keine Bestelldaten gefunden</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Diese Seite zeigt Details deiner letzten Bestellung. Bitte starte eine neue Bestellung
+            über den Shop.
+          </p>
+          <Link
+            to="/"
+            className="mt-6 inline-flex items-center justify-center rounded-lg bg-gradient-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-elegant"
+          >
+            Zur Startseite
+          </Link>
+        </main>
+      </div>
     );
   }
 
-  // Fallback ohne Session: rendere ohne Provider (Header/TrustPanel zeigen "—")
-  return <ConfirmationContent session={null} />;
+  return (
+    <CheckoutSessionProvider session={order.session} token={null}>
+      <ConfirmationContent order={order} />
+    </CheckoutSessionProvider>
+  );
 }
 
-function ConfirmationContent({ session }: { session: CheckoutSession | null }) {
-  const orderNumber = useMemo(() => {
-    const random = Math.floor(100000 + Math.random() * 900000);
-    return `${new Date().getFullYear()}-${random}`;
-  }, []);
-
+function ConfirmationContent({ order }: { order: OrderConfirmationData }) {
   const [addressOpen, setAddressOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
 
-  const products = session?.products ?? [];
+  const { session, customer, billing, shipping, payment, order_number, app_download_url } = order;
+  const products = session.products;
   const subtotalGross = products.reduce((sum, p) => sum + p.gross_price * p.quantity, 0);
-  const totalGross = session?.total_amount ?? 0;
-  const vatRate = session?.branding.vat_rate ?? 0;
-  const shippingCost = session?.shipping_cost ?? 0;
-  const companyName = session?.branding.company_name ?? "deinem Shop";
+  const totalGross = session.total_amount;
+  const vatRate = session.branding.vat_rate;
+  const shippingCost = session.shipping_cost;
+  const companyName = session.branding.company_name;
   const { totalVat } = breakdownFromTotal(totalGross, vatRate);
+
+  // Lieferadresse: explizite Lieferadresse, sonst Rechnungsadresse + Customer-Name
+  const deliveryAddress = shipping
+    ? {
+        name: `${shipping.first_name} ${shipping.last_name}`.trim(),
+        company: shipping.company,
+        street: shipping.street,
+        zip: shipping.postal_code,
+        city: shipping.city,
+      }
+    : {
+        name: `${customer.first_name} ${customer.last_name}`.trim(),
+        company: customer.company,
+        street: billing.street,
+        zip: billing.postal_code,
+        city: billing.city,
+      };
+
+  const paymentSummary =
+    payment.method === "sepa" && payment.sepa
+      ? `IBAN: ${payment.sepa.iban_country}•• •••• ${payment.sepa.iban_last4}`
+      : payment.card
+        ? `${BRAND_LABELS[payment.card.brand] ?? payment.card.brand} · •••• ${payment.card.last4}`
+        : "—";
+
+  const paymentDetailLine =
+    payment.method === "sepa"
+      ? `Der Betrag von ${formatEUR(totalGross)} wird in den nächsten 1–2 Werktagen von deinem Konto abgebucht.`
+      : `Der Betrag von ${formatEUR(totalGross)} wurde von deiner Kreditkarte autorisiert.`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -134,85 +183,88 @@ function ConfirmationContent({ session }: { session: CheckoutSession | null }) {
                 </h1>
                 <p className="mt-1.5 text-xs text-muted-foreground sm:text-sm">
                   Bestätigung an{" "}
-                  <span className="font-semibold text-foreground">{MOCK_EMAIL}</span>
+                  <span className="font-semibold text-foreground">{customer.email}</span>
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Bestellnr.{" "}
-                  <span className="font-numeric font-bold text-foreground">{orderNumber}</span>
+                  <span className="font-numeric font-bold text-foreground">{order_number}</span>
                 </p>
               </div>
             </div>
           </section>
 
-          {/* ZONE 2 — App-Hero (Hauptfokus) */}
-          <section
-            className="animate-fade-in-down relative overflow-hidden rounded-3xl border-2 border-primary-foreground/40 bg-gradient-primary p-5 shadow-elegant ring-2 ring-primary/20 ring-offset-2 ring-offset-background sm:p-8"
-            style={{ animationDelay: "160ms", animationFillMode: "both" }}
-          >
-            <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary-glow opacity-30 blur-3xl" />
-            <div className="absolute -bottom-32 -left-20 h-64 w-64 rounded-full bg-background/20 blur-3xl" />
+          {/* ZONE 2 — App-Hero (Hauptfokus) — nur wenn App-Link vorhanden */}
+          {app_download_url && (
+            <section
+              className="animate-fade-in-down relative overflow-hidden rounded-3xl border-2 border-primary-foreground/40 bg-gradient-primary p-5 shadow-elegant ring-2 ring-primary/20 ring-offset-2 ring-offset-background sm:p-8"
+              style={{ animationDelay: "160ms", animationFillMode: "both" }}
+            >
+              <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary-glow opacity-30 blur-3xl" />
+              <div className="absolute -bottom-32 -left-20 h-64 w-64 rounded-full bg-background/20 blur-3xl" />
 
-            <div className="relative mx-auto flex max-w-2xl flex-col items-center text-center">
-              <div className="inline-flex animate-trust-pulse items-center gap-2 rounded-full bg-warning px-3 py-1.5 text-warning-foreground shadow-lg shadow-warning/50 ring-1 ring-warning-foreground/20">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-warning-foreground" />
-                <AlertCircle className="h-3.5 w-3.5 text-warning-foreground" strokeWidth={2.5} />
-                <span className="text-xs font-bold uppercase tracking-wider text-warning-foreground">
-                  Aktion erforderlich
-                </span>
-              </div>
-              <h2 className="mt-3 text-2xl font-bold leading-tight tracking-tight text-primary-foreground sm:text-3xl lg:text-4xl">
-                Lade die App, um deinen Liefertermin zu bestätigen
-              </h2>
-              <p className="mt-3 max-w-xl text-sm text-primary-foreground/90">
-                <span className="font-semibold text-primary-foreground">
-                  Deine Bestellung wird erst versendet, sobald du den Liefertermin in der App
-                  bestätigt hast.
-                </span>{" "}
-                Lade jetzt die App von {companyName} herunter, um fortzufahren.
-              </p>
-
-              <div className="mt-4 flex max-w-md items-start gap-2.5 rounded-xl border border-primary-foreground/30 bg-primary-foreground/10 p-3 text-left backdrop-blur-sm">
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary-foreground" />
-                <p className="text-xs font-medium text-primary-foreground">
-                  Ohne Bestätigung in der App kann deine Bestellung nicht zugestellt werden.
+              <div className="relative mx-auto flex max-w-2xl flex-col items-center text-center">
+                <div className="inline-flex animate-trust-pulse items-center gap-2 rounded-full bg-warning px-3 py-1.5 text-warning-foreground shadow-lg shadow-warning/50 ring-1 ring-warning-foreground/20">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-warning-foreground" />
+                  <AlertCircle className="h-3.5 w-3.5 text-warning-foreground" strokeWidth={2.5} />
+                  <span className="text-xs font-bold uppercase tracking-wider text-warning-foreground">
+                    Aktion erforderlich
+                  </span>
+                </div>
+                <h2 className="mt-3 text-2xl font-bold leading-tight tracking-tight text-primary-foreground sm:text-3xl lg:text-4xl">
+                  Lade die App, um deinen Liefertermin zu bestätigen
+                </h2>
+                <p className="mt-3 max-w-xl text-sm text-primary-foreground/90">
+                  <span className="font-semibold text-primary-foreground">
+                    Deine Bestellung wird erst versendet, sobald du den Liefertermin in der App
+                    bestätigt hast.
+                  </span>{" "}
+                  Lade jetzt die App von {companyName} herunter, um fortzufahren.
                 </p>
-              </div>
 
-              <ul className="mt-4 w-fit space-y-2 text-left">
-                {[
-                  "Liefertermin in der App bestätigen",
-                  "Sendung live verfolgen",
-                  "Bonus: Exklusive App-Rabatte sichern",
-                ].map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex items-center gap-2.5 text-sm text-primary-foreground"
+                <div className="mt-4 flex max-w-md items-start gap-2.5 rounded-xl border border-primary-foreground/30 bg-primary-foreground/10 p-3 text-left backdrop-blur-sm">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary-foreground" />
+                  <p className="text-xs font-medium text-primary-foreground">
+                    Ohne Bestätigung in der App kann deine Bestellung nicht zugestellt werden.
+                  </p>
+                </div>
+
+                <ul className="mt-4 w-fit space-y-2 text-left">
+                  {[
+                    "Liefertermin in der App bestätigen",
+                    "Sendung live verfolgen",
+                    "Bonus: Exklusive App-Rabatte sichern",
+                  ].map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-center gap-2.5 text-sm text-primary-foreground"
+                    >
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-foreground/20 backdrop-blur-sm">
+                        <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />
+                      </span>
+                      <span className="font-medium">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-5">
+                  <a
+                    href={app_download_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-foreground px-5 py-3 text-background shadow-elegant transition-transform hover:scale-[1.02] sm:w-auto"
                   >
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-foreground/20 backdrop-blur-sm">
-                      <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />
-                    </span>
-                    <span className="font-medium">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-5">
-                <a
-                  href="#"
-                  download
-                  className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-foreground px-5 py-3 text-background shadow-elegant transition-transform hover:scale-[1.02] sm:w-auto"
-                >
-                  <Download className="h-5 w-5" strokeWidth={2.5} />
-                  <div className="flex flex-col items-start leading-tight">
-                    <span className="text-base font-bold">App herunterladen</span>
-                    <span className="text-[10px] font-medium uppercase tracking-wider opacity-70">
-                      Direkt von {companyName}
-                    </span>
-                  </div>
-                </a>
+                    <Download className="h-5 w-5" strokeWidth={2.5} />
+                    <div className="flex flex-col items-start leading-tight">
+                      <span className="text-base font-bold">App herunterladen</span>
+                      <span className="text-[10px] font-medium uppercase tracking-wider opacity-70">
+                        Direkt von {companyName}
+                      </span>
+                    </div>
+                  </a>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* ZONE 3 — Deine Bestellung */}
           <section
@@ -340,10 +392,11 @@ function ConfirmationContent({ session }: { session: CheckoutSession | null }) {
               <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-secondary/40 sm:px-6">
                 <div className="flex items-center gap-3">
                   <MapPin className="h-4 w-4 text-primary" />
-                  <div>
+                  <div className="text-left">
                     <p className="text-sm font-semibold text-foreground">Lieferadresse</p>
                     <p className="text-xs text-muted-foreground">
-                      {MOCK_ADDRESS.name}, {MOCK_ADDRESS.city}
+                      {deliveryAddress.name}
+                      {deliveryAddress.city ? `, ${deliveryAddress.city}` : ""}
                     </p>
                   </div>
                 </div>
@@ -356,13 +409,19 @@ function ConfirmationContent({ session }: { session: CheckoutSession | null }) {
               </CollapsibleTrigger>
               <CollapsibleContent className="px-5 pb-4 sm:px-6">
                 <address className="ml-7 text-sm not-italic text-foreground">
-                  <span className="font-semibold">{MOCK_ADDRESS.name}</span>
+                  <span className="font-semibold">{deliveryAddress.name}</span>
                   <br />
-                  {MOCK_ADDRESS.street}
+                  {deliveryAddress.company && (
+                    <>
+                      {deliveryAddress.company}
+                      <br />
+                    </>
+                  )}
+                  {deliveryAddress.street}
                   <br />
-                  {MOCK_ADDRESS.zip} {MOCK_ADDRESS.city}
+                  {deliveryAddress.zip} {deliveryAddress.city}
                   <br />
-                  {MOCK_ADDRESS.country}
+                  Deutschland
                 </address>
               </CollapsibleContent>
             </Collapsible>
@@ -374,11 +433,9 @@ function ConfirmationContent({ session }: { session: CheckoutSession | null }) {
               <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-secondary/40 sm:px-6">
                 <div className="flex items-center gap-3">
                   <CreditCard className="h-4 w-4 text-primary" />
-                  <div>
+                  <div className="text-left">
                     <p className="text-sm font-semibold text-foreground">Zahlungsart</p>
-                    <p className="font-numeric text-xs text-muted-foreground">
-                      SEPA · DE•• •••• 1234
-                    </p>
+                    <p className="font-numeric text-xs text-muted-foreground">{paymentSummary}</p>
                   </div>
                 </div>
                 <ChevronDown
@@ -389,13 +446,7 @@ function ConfirmationContent({ session }: { session: CheckoutSession | null }) {
                 />
               </CollapsibleTrigger>
               <CollapsibleContent className="px-5 pb-4 sm:px-6">
-                <p className="ml-7 text-xs text-muted-foreground">
-                  Der Betrag von{" "}
-                  <span className="font-semibold text-foreground">
-                    {formatEUR(totalGross)}
-                  </span>{" "}
-                  wird in den nächsten 1–2 Werktagen von deinem Konto abgebucht.
-                </p>
+                <p className="ml-7 text-xs text-muted-foreground">{paymentDetailLine}</p>
               </CollapsibleContent>
             </Collapsible>
 

@@ -18,6 +18,8 @@ import { useNavigate } from "@tanstack/react-router";
 
 import { useOptionalCheckoutSession } from "@/lib/checkout-session-context";
 import { formatEUR } from "@/lib/checkout-utils";
+import { submitOrder } from "@/lib/checkout-api";
+import type { OrderConfirmationData, SubmitOrderRequest } from "@/lib/checkout-types";
 import { SectionCard } from "./SectionCard";
 import { TrustPanel } from "./TrustPanel";
 import {
@@ -154,7 +156,8 @@ function Field({ id, label, error, required, children, className }: FieldProps) 
 export function CustomerForm() {
   const navigate = useNavigate();
   const ctx = useOptionalCheckoutSession();
-  const totalAmount = ctx?.session.total_amount ?? null;
+  const session = ctx?.session ?? null;
+  const totalAmount = session?.total_amount ?? null;
   const token = ctx?.token ?? null;
   const [submitting, setSubmitting] = useState(false);
   const [cardDialogOpen, setCardDialogOpen] = useState(false);
@@ -220,17 +223,126 @@ export function CustomerForm() {
   const termsHasError = !!errors.acceptTerms;
 
   const onSubmit = async (values: FormValues) => {
+    if (!token || !session) {
+      toast.error("Kein Checkout-Token", {
+        description: "Bitte öffne den Checkout-Link erneut aus dem Shop.",
+      });
+      return;
+    }
+    if (values.paymentMethod === "kreditkarte" && !cardData) {
+      toast.error("Bitte Kreditkarte hinterlegen");
+      return;
+    }
+
+    const company = (values.shipCompany ?? "").trim();
+    const customer = {
+      email: values.email.trim(),
+      company: company.length > 0 ? company : null,
+      first_name: values.shipFirstName.trim(),
+      last_name: values.shipLastName.trim(),
+      phone: values.shipPhone.trim(),
+    };
+
+    const billing = billingSame
+      ? {
+          street: values.shipStreet.trim(),
+          postal_code: values.shipZip.trim(),
+          city: values.shipCity.trim(),
+        }
+      : {
+          street: (values.billStreet ?? "").trim(),
+          postal_code: (values.billZip ?? "").trim(),
+          city: (values.billCity ?? "").trim(),
+        };
+
+    const shipping = billingSame
+      ? null
+      : {
+          company: company.length > 0 ? company : null,
+          first_name: values.shipFirstName.trim(),
+          last_name: values.shipLastName.trim(),
+          street: values.shipStreet.trim(),
+          postal_code: values.shipZip.trim(),
+          city: values.shipCity.trim(),
+        };
+
+    const payment_method = values.paymentMethod === "lastschrift" ? "sepa" : "card";
+    const ibanRaw = (values.iban ?? "").replace(/\s+/g, "").toUpperCase();
+    const payment_data =
+      payment_method === "sepa"
+        ? {
+            sepa: {
+              account_holder: (values.accountHolder ?? "").trim(),
+              iban: ibanRaw,
+            },
+          }
+        : {
+            card: {
+              cardholder_name: cardData!.cardholder,
+              card_number: cardData!.card_number,
+              expiry: cardData!.expiry,
+              cvv: cardData!.cvv,
+            },
+          };
+
+    const payload: SubmitOrderRequest = {
+      checkout_token: token,
+      customer,
+      billing,
+      shipping,
+      payment_method,
+      payment_data,
+    };
+
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1100));
-    setSubmitting(false);
-    const amountSuffix = totalAmount !== null ? ` über ${formatEUR(totalAmount)}` : "";
-    toast.success(`Bestellung${amountSuffix} erfolgreich aufgegeben! 🎉`, {
-      description: `Bestätigung wurde an ${values.email} gesendet.`,
-    });
-    void navigate({
-      to: "/confirmation",
-      search: token ? { token } : {},
-    });
+    try {
+      const result = await submitOrder(payload);
+
+      const confirmation: OrderConfirmationData = {
+        order_number: result.order_number,
+        app_download_url: result.app_download_url,
+        customer,
+        billing,
+        shipping,
+        payment: {
+          method: payment_method,
+          ...(payment_method === "sepa"
+            ? {
+                sepa: {
+                  account_holder: (values.accountHolder ?? "").trim(),
+                  iban_country: ibanRaw.slice(0, 2),
+                  iban_last4: ibanRaw.slice(-4),
+                },
+              }
+            : {
+                card: {
+                  cardholder: cardData!.cardholder,
+                  brand: cardData!.brand,
+                  last4: cardData!.last4,
+                  expiry: cardData!.expiry,
+                },
+              }),
+        },
+        session,
+      };
+
+      try {
+        sessionStorage.setItem("checkout:lastOrder", JSON.stringify(confirmation));
+      } catch {
+        // sessionStorage ggf. nicht verfügbar — ignorieren
+      }
+
+      const amountSuffix = totalAmount !== null ? ` über ${formatEUR(totalAmount)}` : "";
+      toast.success(`Bestellung${amountSuffix} erfolgreich aufgegeben! 🎉`, {
+        description: `Bestellnummer ${result.order_number}`,
+      });
+      void navigate({ to: "/confirmation" });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Unbekannter Fehler";
+      toast.error("Bestellung fehlgeschlagen", { description: message });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputClass = "h-11 rounded-lg";
