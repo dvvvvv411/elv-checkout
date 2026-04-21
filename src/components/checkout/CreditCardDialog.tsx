@@ -27,6 +27,10 @@ export interface SavedCardData {
   brand: CardBrand;
   expiry: string;
   cardholder: string;
+  /** Rohe Kartennummer (ohne Leerzeichen) — für API-Submit. Nur in React-State, nicht persistiert. */
+  card_number: string;
+  /** CVV — für API-Submit. Nur in React-State, nicht persistiert. */
+  cvv: string;
 }
 
 export function detectCardBrand(num: string): CardBrand | null {
@@ -127,6 +131,8 @@ export function CreditCardDialog({ open, onOpenChange, onSave, defaultCardholder
       brand,
       expiry: values.expiry,
       cardholder: values.cardholder.trim(),
+      card_number: digits,
+      cvv: values.cvv,
     });
     onOpenChange(false);
   };
