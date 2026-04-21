@@ -1,37 +1,26 @@
 
 
-## Plan: Landingpage `/` ohne Branding & ohne CTAs
+## Plan: Produktbilder aus Bestellübersicht entfernen
 
-In `src/routes/index.tsx` alle markenspezifischen Elemente und Verlinkungen zum Checkout entfernen. Übrig bleibt eine neutrale, seriöse Hero-Darstellung als Payment-Gateway.
+In der Bestellliste (Zone "Deine Bestellung") die Produkt-Thumbnails entfernen — sowohl auf `/checkout` als auch auf `/confirmation`. Die Mengen-Badge wird neben den Produktnamen verschoben, damit die Info erhalten bleibt.
 
-### Entfernen
-- **Header komplett**: Logo "NovaPay", Navigation, "Demo testen"-Button.
-- **Hero-CTAs**: "Live-Checkout testen" und "Vertrieb kontaktieren" — beide Buttons raus.
-- **Secondary-CTA-Section** (`#kontakt`): kompletter Block mit "Bereit, Zahlungen ernst zu nehmen?" und beiden Buttons raus.
-- **Footer komplett**: Copyright "NovaPay GmbH", Impressum/Datenschutz/AGB-Links raus.
-- **Meta-Tags**: "NovaPay" aus `title` und `og:title` entfernen → neutraler Titel wie "Sicheres Payment-Gateway für Europa".
-- **Stats-Eintrag** "12.487+ Händler" entfernen (impliziert konkretes Unternehmen) — bleibt: Uptime, Länder, Latenz.
+### Änderungen
 
-### Behalten (neutrale Inhalte)
-- Trust-Badge "PCI DSS Level 1 zertifiziert · PSD2-konform"
-- H1 "Zahlungen, denen Ihre Kunden vertrauen" + neutrale Subline (ohne Markenname)
-- Trust-Row (SSL/TLS, 3D-Secure, DSGVO, ISO 27001)
-- Stats-Strip (3 KPIs statt 4)
-- Feature-Grid (3 Karten: Sichere Zahlungen, Schnelle Integration, Käuferschutz)
+**`src/components/checkout/OrderSummary.tsx`** (genutzt in `/checkout`)
+- In `MOCK_ITEMS`: `image`-Feld kann bleiben (wird nur nicht mehr gerendert) — keine Datenänderung nötig.
+- Im `<li>`-Rendering den kompletten `<div>`-Block mit `h-14 w-14 rounded-xl bg-gradient-soft` (Emoji + Mengen-Badge) entfernen.
+- Menge stattdessen als kleines neutrales Label vor dem Produktnamen anzeigen, z.B. `2 ×  Schnellladekabel USB-C`, in `text-muted-foreground font-medium`.
+- Layout des `<li>` vereinfachen: nur noch zwei Spalten (Name links flexibel, Preis rechts).
 
-### Struktur danach
-```text
-[Hero: Badge → H1 → Subline → Trust-Row]
-[Stats-Strip: 3 KPIs]
-[Feature-Grid: 3 Karten]
-```
-Keine Header, keine Buttons, kein Footer — reine Info-Landingpage.
+**`src/routes/confirmation.tsx`** (Bestellzusammenfassung in Zone 3)
+- Identisches Pattern: Falls dort eine eigene Items-Liste mit Bild-Thumbnails gerendert wird, denselben Thumbnail-Block entfernen und die Menge als `2 ×`-Prefix vor den Namen setzen.
+- Falls die Confirmation-Seite den `OrderSummary`-Component wiederverwendet, ist mit der Änderung oben automatisch alles erledigt — sonst analoge Anpassung direkt in `confirmation.tsx`.
 
-### Imports bereinigen
-- `Link`, `Button`, `buttonVariants` entfernen (nicht mehr verwendet).
-- `Zap`, `Globe` entfernen.
-- Behalten: `ShieldCheck`, `Lock`, `Code2`, `CheckCircle2`.
+### Beibehalten
+- Produktnamen, Menge (als `N ×`-Prefix), Einzelpreis-Summe rechts.
+- Alle anderen Sektionen (Rabattcode, Kostenaufschlüsselung, Gesamt) bleiben unverändert.
 
-### Geänderte Datei
-- `src/routes/index.tsx`
+### Geänderte Dateien
+- `src/components/checkout/OrderSummary.tsx`
+- `src/routes/confirmation.tsx` (nur falls dort eine eigene Items-Liste mit Bildern existiert)
 
