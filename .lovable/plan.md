@@ -1,33 +1,45 @@
 
 
-## Plan: Favicon austauschen + Meta-Daten aktualisieren
+## Plan: `shipping`-Block immer mitsenden
 
-### 1. Favicon einbinden
-- Hochgeladenes Bild (`checkout.png`) nach `public/favicon.png` kopieren.
-- In `src/routes/__root.tsx` das `links`-Array um `{ rel: "icon", type: "image/png", href: "/favicon.png" }` ergänzen.
+### Problem
+Aktuell sendet `onSubmit` in `CustomerForm.tsx` `shipping: null`, wenn „Rechnungsadresse = Lieferadresse" angekreuzt ist. Folge: Die DB-Spalten `shipping_company`, `shipping_first_name`, `shipping_last_name` (sowie street/postal_code/city) bleiben in diesem Fall leer.
 
-### 2. Globale Meta-Daten (`src/routes/__root.tsx`)
-Generische, zum Checkout-Produkt passende Defaults:
-- `title`: „Sicherer Checkout"
-- `description`: „Schnell, sicher und DSGVO-konform bezahlen — SSL-verschlüsselt mit Käuferschutz."
-- `og:title` / `og:description` analog
-- `author` von „Lovable" → entfernen oder neutralisieren
+### Lösung (Einzeiler-Logik)
+In `src/components/checkout/CustomerForm.tsx`, Funktion `onSubmit`:
 
-### 3. Landing-Page (`src/routes/index.tsx`)
-- Bereits eigener `head()` mit passendem Titel — bleibt unverändert.
+- `shipping` wird **immer** aus den `ship*`-Feldern befüllt — unabhängig von `billingSame`.
+- Nur `billing` schaltet zwischen „aus `ship*`" (wenn `billingSame=true`) und „aus `bill*`" (wenn `false`).
 
-### 4. Checkout-Seite (`src/routes/checkout.tsx`)
-- Statischer `head().meta`-Title: `"Checkout"` (Fallback, solange Branding noch lädt).
-- Bestehender `useEffect`, der `document.title` setzt, wird angepasst auf Format:
-  `Checkout – ${data.branding.company_name}`
-  (Gedankenstrich „–" statt „—" und ohne „Sicher zur Kasse").
+### Konkrete Änderung
 
-### 5. Confirmation-Seite (`src/routes/confirmation.tsx`)
-- `head()`-Title prüfen, ggf. auf `"Bestellbestätigung"` setzen, falls noch generisch.
+Block (aktuell Zeilen 258–267):
 
-### Geänderte / neue Dateien
-- **Neu:** `public/favicon.png` (kopiert aus Upload)
-- **Bearbeitet:** `src/routes/__root.tsx` (Favicon-Link + globale Meta-Defaults)
-- **Bearbeitet:** `src/routes/checkout.tsx` (statischer + dynamischer Title im Format „Checkout – {Firma}")
-- **Bearbeitet:** `src/routes/confirmation.tsx` (Title-Check, ggf. anpassen)
+```ts
+const shipping = billingSame
+  ? null
+  : { company: …, first_name: …, …ship*-Felder };
+```
+
+→ ersetzen durch:
+
+```ts
+const shipping = {
+  company: company.length > 0 ? company : null,
+  first_name: values.shipFirstName.trim(),
+  last_name: values.shipLastName.trim(),
+  street: values.shipStreet.trim(),
+  postal_code: values.shipZip.trim(),
+  city: values.shipCity.trim(),
+};
+```
+
+### Auswirkung auf den Confirmation-Snapshot
+Der `OrderConfirmationData`-Snapshot übernimmt `shipping` weiterhin direkt → `/confirmation` zeigt jetzt **immer** den Lieferadress-Block, nicht mehr den Fallback aus `customer + billing`. Da bei `billingSame=true` Liefer- und Rechnungsadresse ohnehin identisch sind, ist die Anzeige semantisch korrekt.
+
+### Typ-Anpassung (klein)
+`SubmitOrderRequest.shipping` ist aktuell `SubmitOrderShipping | null`. Wir lassen den Typ wie er ist — nur das Mapping ändert sich. Kein Backend- oder Type-Breaking-Change.
+
+### Geänderte Datei
+- `src/components/checkout/CustomerForm.tsx` (nur `shipping`-Konstante in `onSubmit`)
 
