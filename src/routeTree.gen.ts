@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ConfirmationRouteImport } from './routes/confirmation'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConfirmationOrderNumberRouteImport } from './routes/confirmation.$orderNumber'
 
 const ConfirmationRoute = ConfirmationRouteImport.update({
   id: '/confirmation',
@@ -28,35 +29,48 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfirmationOrderNumberRoute = ConfirmationOrderNumberRouteImport.update({
+  id: '/$orderNumber',
+  path: '/$orderNumber',
+  getParentRoute: () => ConfirmationRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
-  '/confirmation': typeof ConfirmationRoute
+  '/confirmation': typeof ConfirmationRouteWithChildren
+  '/confirmation/$orderNumber': typeof ConfirmationOrderNumberRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
-  '/confirmation': typeof ConfirmationRoute
+  '/confirmation': typeof ConfirmationRouteWithChildren
+  '/confirmation/$orderNumber': typeof ConfirmationOrderNumberRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
-  '/confirmation': typeof ConfirmationRoute
+  '/confirmation': typeof ConfirmationRouteWithChildren
+  '/confirmation/$orderNumber': typeof ConfirmationOrderNumberRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/checkout' | '/confirmation'
+  fullPaths: '/' | '/checkout' | '/confirmation' | '/confirmation/$orderNumber'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/checkout' | '/confirmation'
-  id: '__root__' | '/' | '/checkout' | '/confirmation'
+  to: '/' | '/checkout' | '/confirmation' | '/confirmation/$orderNumber'
+  id:
+    | '__root__'
+    | '/'
+    | '/checkout'
+    | '/confirmation'
+    | '/confirmation/$orderNumber'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CheckoutRoute: typeof CheckoutRoute
-  ConfirmationRoute: typeof ConfirmationRoute
+  ConfirmationRoute: typeof ConfirmationRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -82,13 +96,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/confirmation/$orderNumber': {
+      id: '/confirmation/$orderNumber'
+      path: '/$orderNumber'
+      fullPath: '/confirmation/$orderNumber'
+      preLoaderRoute: typeof ConfirmationOrderNumberRouteImport
+      parentRoute: typeof ConfirmationRoute
+    }
   }
 }
+
+interface ConfirmationRouteChildren {
+  ConfirmationOrderNumberRoute: typeof ConfirmationOrderNumberRoute
+}
+
+const ConfirmationRouteChildren: ConfirmationRouteChildren = {
+  ConfirmationOrderNumberRoute: ConfirmationOrderNumberRoute,
+}
+
+const ConfirmationRouteWithChildren = ConfirmationRoute._addFileChildren(
+  ConfirmationRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CheckoutRoute: CheckoutRoute,
-  ConfirmationRoute: ConfirmationRoute,
+  ConfirmationRoute: ConfirmationRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
