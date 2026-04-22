@@ -704,13 +704,13 @@ export function CustomerForm() {
           />
           <p className="text-sm text-foreground">
             Ich stimme den{" "}
-            <a href="#" className="font-medium text-primary underline-offset-2 hover:underline">
+            <span className="font-medium text-primary">
               Allgemeinen Geschäftsbedingungen
-            </a>{" "}
+            </span>{" "}
             und der{" "}
-            <a href="#" className="font-medium text-primary underline-offset-2 hover:underline">
+            <span className="font-medium text-primary">
               Datenschutzerklärung
-            </a>{" "}
+            </span>{" "}
             zu.
           </p>
         </label>
