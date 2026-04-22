@@ -19,7 +19,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useOptionalCheckoutSession } from "@/lib/checkout-session-context";
 import { formatEUR } from "@/lib/checkout-utils";
 import { submitOrder } from "@/lib/checkout-api";
-import type { OrderConfirmationData, SubmitOrderRequest } from "@/lib/checkout-types";
+import type { SubmitOrderRequest } from "@/lib/checkout-types";
 import { SectionCard } from "./SectionCard";
 import { TrustPanel } from "./TrustPanel";
 import {
