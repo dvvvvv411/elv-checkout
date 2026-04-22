@@ -9,7 +9,7 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 export default defineConfig({
   vite: {
     server: {
-      allowedHosts: ["checkout.antpiregmbh.de", ".antpiregmbh.de", ".lovable.app"],
+      allowedHosts: ["checkout.piana-heizoel.de", ".piana-heizoel.de", ".lovable.app"],
     },
   },
 });
