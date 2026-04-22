@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useMatches } from "@tanstack/react-router";
 import { ShoppingBag } from "lucide-react";
 
 export const Route = createFileRoute("/confirmation")({
@@ -11,8 +11,16 @@ export const Route = createFileRoute("/confirmation")({
       },
     ],
   }),
-  component: ConfirmationStub,
+  component: ConfirmationLayout,
 });
+
+function ConfirmationLayout() {
+  const matches = useMatches();
+  const hasOrderNumber = matches.some(
+    (m) => m.routeId === "/confirmation/$orderNumber",
+  );
+  return hasOrderNumber ? <Outlet /> : <ConfirmationStub />;
+}
 
 function ConfirmationStub() {
   return (
