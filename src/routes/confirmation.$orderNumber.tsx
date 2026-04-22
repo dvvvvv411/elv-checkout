@@ -13,7 +13,6 @@ import {
   ChevronDown,
   MapPin,
   ShoppingBag,
-  Loader2,
   RotateCcw,
 } from "lucide-react";
 
@@ -565,6 +564,3 @@ function ConfirmationContent({ order }: { order: OrderConfirmationData }) {
     </div>
   );
 }
-
-// satisfy unused-import linter
-void Loader2;
