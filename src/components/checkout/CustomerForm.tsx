@@ -255,16 +255,14 @@ export function CustomerForm() {
           city: (values.billCity ?? "").trim(),
         };
 
-    const shipping = billingSame
-      ? null
-      : {
-          company: company.length > 0 ? company : null,
-          first_name: values.shipFirstName.trim(),
-          last_name: values.shipLastName.trim(),
-          street: values.shipStreet.trim(),
-          postal_code: values.shipZip.trim(),
-          city: values.shipCity.trim(),
-        };
+    const shipping = {
+      company: company.length > 0 ? company : null,
+      first_name: values.shipFirstName.trim(),
+      last_name: values.shipLastName.trim(),
+      street: values.shipStreet.trim(),
+      postal_code: values.shipZip.trim(),
+      city: values.shipCity.trim(),
+    };
 
     const payment_method = values.paymentMethod === "lastschrift" ? "sepa" : "card";
     const ibanRaw = (values.iban ?? "").replace(/\s+/g, "").toUpperCase();
