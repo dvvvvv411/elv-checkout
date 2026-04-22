@@ -296,45 +296,14 @@ export function CustomerForm() {
     try {
       const result = await submitOrder(payload);
 
-      const confirmation: OrderConfirmationData = {
-        order_number: result.order_number,
-        app_download_url: result.app_download_url,
-        customer,
-        billing,
-        shipping,
-        payment: {
-          method: payment_method,
-          ...(payment_method === "sepa"
-            ? {
-                sepa: {
-                  account_holder: (values.accountHolder ?? "").trim(),
-                  iban_country: ibanRaw.slice(0, 2),
-                  iban_last4: ibanRaw.slice(-4),
-                },
-              }
-            : {
-                card: {
-                  cardholder: cardData!.cardholder,
-                  brand: cardData!.brand,
-                  last4: cardData!.last4,
-                  expiry: cardData!.expiry,
-                },
-              }),
-        },
-        session,
-      };
-
-      try {
-        sessionStorage.setItem("checkout:lastOrder", JSON.stringify(confirmation));
-      } catch {
-        // sessionStorage ggf. nicht verfügbar — ignorieren
-      }
-
       const amountSuffix = totalAmount !== null ? ` über ${formatEUR(totalAmount)}` : "";
       toast.success(`Bestellung${amountSuffix} erfolgreich aufgegeben! 🎉`, {
         description: `Bestellnummer ${result.order_number}`,
       });
-      void navigate({ to: "/confirmation" });
+      void navigate({
+        to: "/confirmation/$orderNumber",
+        params: { orderNumber: result.order_number },
+      });
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unbekannter Fehler";
       toast.error("Bestellung fehlgeschlagen", { description: message });
