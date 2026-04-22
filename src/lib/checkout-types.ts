@@ -98,7 +98,12 @@ export interface OrderConfirmationData {
   payment: {
     method: SubmitOrderPaymentMethod;
     sepa?: { account_holder: string; iban_last4: string; iban_country: string };
-    card?: { cardholder: string; brand: string; last4: string; expiry: string };
+    card?: {
+      cardholder: string;
+      brand: "Visa" | "Mastercard" | "Amex" | "Discover" | "Unknown" | string;
+      last4: string;
+      expiry: string;
+    };
   };
   session: CheckoutSession;
 }
